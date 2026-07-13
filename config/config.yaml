@@ -1,0 +1,69 @@
+# POWERGRID Supply Chain Optimization Project Configuration
+
+paths:
+  raw_data_path: "data/raw/raw_dataset.csv"
+  processed_train_path: "data/processed/train_dataset.csv"
+  processed_val_path: "data/processed/val_dataset.csv"
+  processed_test_path: "data/processed/test_dataset.csv"
+  processed_dataset_path: "data/processed/processed_dataset.csv"
+  validation_report_path: "reports/validation_report.csv"
+  feature_summary_path: "reports/feature_summary.csv"
+  data_quality_report_path: "reports/data_quality_report.md"
+  data_dictionary_path: "reports/data_dictionary.md"
+  pipeline_diagram_path: "reports/pipeline_diagram.md"
+
+random_seed: 42
+
+split_ratios:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+
+feature_engineering:
+  lag_periods: [1, 2, 3]
+  rolling_windows: [3, 6]
+  epsilon: 0.00001
+  lead_time_bins: [-999999, 35, 70, 999999]  # Short, Medium, Long limits
+
+validation:
+  allowed_regions: ["NR", "ER", "WR", "SR", "NER"]
+  allowed_project_phases:
+    - "Planning"
+    - "Foundation"
+    - "Tower Erection"
+    - "Stringing"
+    - "Testing & Commissioning"
+  allowed_material_types:
+    - "Conductor"
+    - "Tower Member"
+    - "Insulator"
+    - "Transformer"
+    - "Earthwire"
+    - "Hardware Fittings"
+  date_bounds:
+    start: "2020-01-01"
+    end: "2030-12-31"
+
+logging:
+  log_level: "INFO"
+  log_file_path: "logs/pipeline.log"
+  console_output: true
+  log_format: "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d]: %(message)s"
+
+future_model_placeholders:
+  decomposition_methods: ["EMD", "DWT"]
+  forecasting_algorithms:
+    - "MLP"
+    - "LSTM"
+    - "RandomForest"
+    - "SVR"
+    - "XGBoost"
+    - "LightGBM"
+  optimization:
+    framework: "PuLP"
+    solver: "CBC"
+    objectives:
+      - "Minimize Cost"
+      - "Reduce Delivery Time"
+      - "Maximize Service Level"
+      - "Minimize Inventory Instability"

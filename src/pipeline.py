@@ -1,11 +1,15 @@
 import pandas as pd
 import numpy as np
+import time
+from datetime import datetime
 from pathlib import Path
 import joblib
 
 from src.config.settings import (
     RAW_DATA_PATH, PROCESSED_TRAIN_PATH, PROCESSED_VAL_PATH, PROCESSED_TEST_PATH,
-    PROCESSED_DATA_DIR, VALIDATION_REPORT_PATH, FEATURE_SUMMARY_PATH, DATE_COL, TARGET_COL
+    PROCESSED_DATASET_PATH, VALIDATION_REPORT_PATH, FEATURE_SUMMARY_PATH, 
+    DATA_QUALITY_REPORT_PATH, DATA_DICTIONARY_PATH, PIPELINE_DIAGRAM_PATH,
+    DATE_COL, TARGET_COL, TRAIN_RATIO, VAL_RATIO
 )
 from src.data_generation.generator import generate_powergrid_data
 from src.validation.validator import run_data_validation, save_validation_report
@@ -15,20 +19,15 @@ from src.preprocessing.scaler import NumericalScaler
 from src.features.temporal import extract_temporal_features
 from src.features.engineer import FeatureEngineer, generate_feature_summary
 from src.utils.helpers import setup_logger
+from src.utils.reports_generator import (
+    generate_data_quality_report, generate_data_dictionary, generate_pipeline_diagram
+)
 
 logger = setup_logger("pipeline")
 
-def split_data_chronologically(df: pd.DataFrame, train_ratio: float = 0.7, val_ratio: float = 0.15) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def split_data_chronologically(df: pd.DataFrame, train_ratio: float = TRAIN_RATIO, val_ratio: float = VAL_RATIO) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits the dataset chronologically based on unique dates to avoid lookahead bias.
-    
-    Parameters:
-    df (pd.DataFrame): The dataset containing a Date column
-    train_ratio (float): Ratio for training partition
-    val_ratio (float): Ratio for validation partition
-    
-    Returns:
-    tuple: (train_df, val_df, test_df)
     """
     logger.info("Performing chronological split of dataset...")
     
@@ -36,7 +35,7 @@ def split_data_chronologically(df: pd.DataFrame, train_ratio: float = 0.7, val_r
     temp_dates = pd.to_datetime(df[DATE_COL], errors='coerce')
     df_sorted = df.copy()
     df_sorted["_TempDate"] = temp_dates
-    # Drop rows with unparseable dates during split (they will be dropped in cleaner anyway)
+    # Drop rows with unparseable dates during split
     df_sorted = df_sorted.dropna(subset=["_TempDate"])
     df_sorted = df_sorted.sort_values(by="_TempDate").reset_index(drop=True)
     
@@ -76,11 +75,15 @@ def run_pipeline(method: str = "ordinal") -> dict:
     9. Performs validation on processed datasets to ensure data quality.
     10. Saves final files, summaries, and serialized models.
     """
+    pipeline_start = time.perf_counter()
     logger.info("=========================================")
     logger.info("POWERGRID ML DATA PIPELINE STARTED")
     logger.info("=========================================")
     
+    metrics = {}
+    
     # 1. Load or Generate Raw Data
+    stage_start = time.perf_counter()
     if not RAW_DATA_PATH.exists():
         logger.info(f"Raw data not found at {RAW_DATA_PATH}. Generating new dataset...")
         raw_df = generate_powergrid_data(6000)
@@ -90,14 +93,30 @@ def run_pipeline(method: str = "ordinal") -> dict:
     else:
         logger.info(f"Loading existing raw data from {RAW_DATA_PATH}...")
         raw_df = pd.read_csv(RAW_DATA_PATH)
-        
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Data Generation / Load' completed in {duration:.4f}s. Records: {len(raw_df)}")
+    metrics["load"] = {"start": stage_start, "duration": duration, "records": len(raw_df)}
+    
+    # Pre-calculate anomalies count for reporting
+    raw_missing_count = int(raw_df.isnull().sum().sum())
+    raw_dup_count = int(raw_df.duplicated().sum())
+
     # 2. Validate Raw Data
+    stage_start = time.perf_counter()
     raw_val_report = run_data_validation(raw_df, stage="raw")
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Raw Validation' completed in {duration:.4f}s.")
+    metrics["val_raw"] = {"start": stage_start, "duration": duration}
     
     # 3. Chronological Split
+    stage_start = time.perf_counter()
     train_df, val_df, test_df = split_data_chronologically(raw_df)
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Chronological Split' completed in {duration:.4f}s.")
+    metrics["split"] = {"start": stage_start, "duration": duration}
     
     # 4. Clean Splits
+    stage_start = time.perf_counter()
     cleaner = DataCleaner()
     cleaner.fit(train_df)
     
@@ -107,14 +126,23 @@ def run_pipeline(method: str = "ordinal") -> dict:
     
     # Save the cleaner for future inference
     joblib.dump(cleaner, Path(RAW_DATA_PATH).parent.parent.parent / "models" / "data_cleaner.joblib")
-    logger.info("Saved data cleaner model.")
+    duration = time.perf_counter() - stage_start
+    
+    records_removed = len(raw_df) - (len(train_clean) + len(val_clean) + len(test_clean))
+    logger.info(f"Stage 'Data Cleaning' completed in {duration:.4f}s. Records removed: {records_removed}")
+    metrics["clean"] = {"start": stage_start, "duration": duration, "removed": records_removed}
     
     # 5. Extract Temporal Features
+    stage_start = time.perf_counter()
     train_temp = extract_temporal_features(train_clean)
     val_temp = extract_temporal_features(val_clean)
     test_temp = extract_temporal_features(test_clean)
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Temporal Feature Extraction' completed in {duration:.4f}s.")
+    metrics["temporal"] = {"start": stage_start, "duration": duration}
     
     # 6. Extract Domain and Time Series Features
+    stage_start = time.perf_counter()
     engineer = FeatureEngineer()
     engineer.fit(train_temp)
     
@@ -124,14 +152,18 @@ def run_pipeline(method: str = "ordinal") -> dict:
     
     # Save the feature engineer for future inference
     joblib.dump(engineer, Path(RAW_DATA_PATH).parent.parent.parent / "models" / "feature_engineer.joblib")
-    logger.info("Saved feature engineer model.")
     
     # Generate feature summary on train set
     feat_summary = generate_feature_summary(train_eng)
     feat_summary.to_csv(FEATURE_SUMMARY_PATH, index=False)
-    logger.info(f"Feature summary saved to {FEATURE_SUMMARY_PATH}")
+    duration = time.perf_counter() - stage_start
+    
+    features_created = len(train_eng.columns) - len(train_temp.columns)
+    logger.info(f"Stage 'Domain Feature Engineering' completed in {duration:.4f}s. Features created: {features_created}")
+    metrics["engineer"] = {"start": stage_start, "duration": duration, "features_created": features_created}
     
     # 7. Encode Categorical Columns
+    stage_start = time.perf_counter()
     encoder = CategoricalEncoder(method=method)
     encoder.fit(train_eng)
     
@@ -139,8 +171,12 @@ def run_pipeline(method: str = "ordinal") -> dict:
     val_enc = encoder.transform(val_eng)
     test_enc = encoder.transform(test_eng)
     encoder.save()
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Categorical Encoding' completed in {duration:.4f}s.")
+    metrics["encode"] = {"start": stage_start, "duration": duration}
     
     # 8. Scale Numerical Features
+    stage_start = time.perf_counter()
     scaler = NumericalScaler()
     scaler.fit(train_enc)
     
@@ -148,28 +184,59 @@ def run_pipeline(method: str = "ordinal") -> dict:
     val_scaled = scaler.transform(val_enc)
     test_scaled = scaler.transform(test_enc)
     scaler.save()
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Numerical Scaling' completed in {duration:.4f}s.")
+    metrics["scale"] = {"start": stage_start, "duration": duration}
     
     # 9. Validate Cleaned Train Data
-    # Validate cleaned train set to confirm that duplicates, nulls, negatives, etc. are eliminated
+    stage_start = time.perf_counter()
     processed_val_report = run_data_validation(train_eng, stage="cleaned")
     
-    # Combine reports and save
+    # Combine validation reports and save
     full_report = pd.concat([raw_val_report, processed_val_report], ignore_index=True)
     save_validation_report(full_report)
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Clean Validation' completed in {duration:.4f}s.")
+    metrics["val_clean"] = {"start": stage_start, "duration": duration}
     
     # 10. Save processed datasets
     train_scaled.to_csv(PROCESSED_TRAIN_PATH, index=False)
     val_scaled.to_csv(PROCESSED_VAL_PATH, index=False)
     test_scaled.to_csv(PROCESSED_TEST_PATH, index=False)
     
-    # Create a concatenated processed dataset as well (requested: processed_dataset.csv)
-    # To facilitate unified analysis, combine train/val/test in sequence
+    # Create combined processed dataset (processed_dataset.csv)
     processed_all = pd.concat([train_scaled, val_scaled, test_scaled], ignore_index=True)
-    processed_all_path = PROCESSED_DATA_DIR / "processed_dataset.csv"
-    processed_all.to_csv(processed_all_path, index=False)
+    processed_all.to_csv(PROCESSED_DATASET_PATH, index=False)
     
+    # 11. Generate Markdown Research Reports
+    stage_start = time.perf_counter()
+    logger.info("Generating markdown reports (Data Quality, Data Dictionary, Pipeline Diagram)...")
+    
+    # Generate Data Quality Report
+    generate_data_quality_report(
+        raw_df=raw_df,
+        cleaned_df=train_eng,
+        validation_df=full_report,
+        feat_summary_df=feat_summary,
+        output_path=DATA_QUALITY_REPORT_PATH
+    )
+    # Generate Data Dictionary
+    generate_data_dictionary(
+        df=train_eng,
+        output_path=DATA_DICTIONARY_PATH
+    )
+    # Generate Pipeline Diagram
+    generate_pipeline_diagram(
+        output_path=PIPELINE_DIAGRAM_PATH
+    )
+    
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Reports Generation' completed in {duration:.4f}s.")
+    metrics["reports"] = {"start": stage_start, "duration": duration}
+    
+    pipeline_duration = time.perf_counter() - pipeline_start
     logger.info("=========================================")
-    logger.info("POWERGRID ML DATA PIPELINE COMPLETED")
+    logger.info(f"POWERGRID ML DATA PIPELINE COMPLETED IN {pipeline_duration:.4f}s")
     logger.info("=========================================")
     
     return {
@@ -177,7 +244,12 @@ def run_pipeline(method: str = "ordinal") -> dict:
         "train_shape": train_scaled.shape,
         "val_shape": val_scaled.shape,
         "test_shape": test_scaled.shape,
-        "processed_all_shape": processed_all.shape
+        "processed_all_shape": processed_all.shape,
+        "duration": pipeline_duration,
+        "raw_anomalies": {
+            "missing": raw_missing_count,
+            "duplicates": raw_dup_count
+        }
     }
 
 if __name__ == "__main__":
