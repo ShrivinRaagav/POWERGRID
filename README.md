@@ -7,28 +7,28 @@ The project architecture is inspired by the research paper: **"A Machine Learnin
 ---
 
 ## 📋 Table of Contents
-1. [Project Overview](#project-overview)
-2. [Research Motivation](#research-motivation)
-3. [Architecture Diagram](#architecture-diagram)
-4. [Folder Structure](#folder-structure)
-5. [Current Progress (30% Scope)](#current-progress-30-scope)
-6. [Future Modules (70% Roadmap)](#future-modules-70-roadmap)
-7. [Installation & Setup](#installation--setup)
-8. [Execution Guide](#execution-guide)
-9. [Expected Deliverables](#expected-deliverables)
+1. [Project Overview](#1-project-overview)
+2. [Research Motivation](#2-research-motivation)
+3. [POWERGRID Problem Statement](#3-powergrid-problem-statement)
+4. [Current Progress (30% Scope)](#4-current-progress-30-scope)
+5. [Completed Modules](#5-completed-modules)
+6. [Architecture Diagram](#6-architecture-diagram)
+7. [Pipeline Diagram](#7-pipeline-diagram)
+8. [Folder Structure](#8-folder-structure)
+9. [Execution Instructions](#9-execution-instructions)
+10. [Generated Reports](#10-generated-reports)
+11. [Future Work](#11-future-work)
 
 ---
 
-## 🔍 Project Overview
-
-Transmission grid expansion projects (towers, substations, conductors) face severe supply chain bottlenecks, transport delays, and budget constraints. This framework implements **Module 1 (Data Collection, Cleaning, Preprocessing, Validation, and Feature Engineering)**.
+## 1. Project Overview
+Transmission grid infrastructure projects (conductors, insulators, towers, transformers, etc.) require precise procurement schedules to prevent project cost overruns and delays. This framework implements **Module 1 (Data Collection, Cleaning, Preprocessing, Validation, and Feature Engineering)**. 
 
 It simulates a highly realistic operational grid environment, validates data quality using a custom verification suite, performs modular data cleaning, engineers cyclical and time-lagged parameters, and normalizes inputs—laying the foundation for future decomposition and multi-objective optimization solvers.
 
 ---
 
-## 💡 Research Motivation
-
+## 2. Research Motivation
 Based on the referenced IEEE publication, traditional grid planning models rely on static historical demand baselines, exposing supply chains to stockouts, inventory congestion, and supplier delay penalties. 
 
 This research establishes a framework where:
@@ -38,187 +38,118 @@ This research establishes a framework where:
 
 ---
 
-## 📊 Architecture Diagram
+## 3. POWERGRID Problem Statement
+Under the Smart India Hackathon scope, POWERGRID (Ministry of Power) requires an intelligent, data-driven material planning system. Transmission lines span thousands of kilometers and pass through extreme geographical regions. Logistics are vulnerable to weather disruptions, regional monsoon delays, supplier risk variations, and sudden project accelerations. 
 
-The visual flow of the data preprocessing and feature engineering sequence is structured as follows:
-
-```
-                  ┌──────────────────────────────┐
-                  │         Raw Dataset          │
-                  │      (raw_dataset.csv)       │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │     Pre-Cleaning Check       │
-                  │    (validator.py log)        │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │        Data Cleaning         │
-                  │   (imputers, outlier caps)   │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │     Feature Engineering      │
-                  │  (cyclical time, lags, SC)   │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │    Post-Cleaning Validate    │
-                  │     (zero errors logged)     │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │    Chronological Splitting   │
-                  │   (70% Train/15% Val/15% Test)│
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │     Encoding & Scaling       │
-                  │  (StandardScaler/Ordinalfit) │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                  ┌──────────────────────────────┐
-                  │      Processed Outputs       │
-                  │   (train, val, test CSVs)    │
-                  └──────────────────────────────┘
-```
-
-For a detailed view of the node pipeline, refer to [reports/pipeline_diagram.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/pipeline_diagram.md).
+This module sets up a robust data pipeline that simulates these operational realisms, cleans input errors, handles outliers, and computes mathematical features suitable for machine learning forecasting.
 
 ---
 
-## 📂 Folder Structure
-
-```
-POWERGRID/
-│
-├── config/
-│   └── config.yaml           # Centralized configuration variables (paths, splits, seeds)
-│
-├── data/
-│   ├── raw/                  # Raw synthetic dataset with controlled noise
-│   ├── processed/            # Scaled, encoded, engineered train/val/test datasets
-│   └── external/             # External reference data (empty)
-│
-├── logs/                     # Persistent log files recording pipeline runs
-│   └── pipeline.log
-│
-├── models/                   # Serialized Python cleaner, encoder, and scaler objects
-│
-├── reports/                  # Validation reports, summaries, and visualizations
-│   ├── data_quality_report.md
-│   ├── data_dictionary.md
-│   ├── pipeline_diagram.md
-│   ├── validation_report.csv
-│   └── feature_summary.csv
-│
-├── src/
-│   ├── config/
-│   │   └── settings.py       # Reads YAML variables and exposes constants
-│   ├── data_generation/
-│   │   └── generator.py      # Generates operational scenario grid datasets (6,000+ rows)
-│   ├── preprocessing/
-│   │   ├── cleaner.py        # Imputation, outlier capping, duplicate removal
-│   │   ├── encoder.py        # Categoric encoders (Ordinal/One-Hot)
-│   │   └── scaler.py         # Z-Score numerical standardizer
-│   ├── features/
-│   │   ├── temporal.py       # Cyclical time transforms (sine/cosine)
-│   │   └── engineer.py       # Chronological lags, rolling averages, supply chain metrics
-│   ├── validation/
-│   │   └── validator.py      # Asserts data constraints and quality criteria
-│   └── utils/
-│       ├── helpers.py        # Dual logger setup (Console + File)
-│       └── reports_generator.py # Automatically builds research reports at runtime
-│
-├── tests/                    # Automated testing suite
-│   └── test_pipeline.py
-│
-├── requirements.txt          # Library dependencies
-├── README.md                 # Project README
-└── run_pipeline.py           # Orchestrator CLI entry point
-```
-
----
-
-## 📈 Current Progress (30% Scope)
-
+## 4. Current Progress (30% Scope)
 This framework strictly covers **Module 1 (Data Collection & Preprocessing)**:
-*   **Operational Simulator**: Generates 6,000+ sequential records modeling:
-    *   *Monsoon impacts* (extended lead times and transport cost overheads in rain-heavy regions).
-    *   *Weather anomalies* (heat/cold wave logistics disruptions and supplier risk shocks).
-    *   *Emergency projects* (doubled demand, priority expedited shipping, and cost premiums).
-    *   *Supply bottlenecks* (materials shortages driving inventories down and raw commodity prices up).
-    *   *Logistics penalties* (warehouse congestion costs, stockout shipping premiums, strikes/landslides).
-*   **Centralized Configuration**: All variables (paths, validation constraints, split ratios, seeds, parameters) are managed via [config/config.yaml](file:///c:/Users/kavsh/Desktop/POWERGRID/config/config.yaml).
-*   **Validation Suite**: Automatic quality checking (pre-cleaning vs. post-cleaning tests).
-*   **Outlier & Missingness Treatment**: Imputation fit on the training split only and standard IQR outlier Winsorization.
-*   **Feature Engineering**: Creates 22 engineered features, including cyclical dates, chronological warehouse-material lagged demands (1-3 weeks), rolling averages (3 & 6 weeks), inventory utilization, lead time categories, risk scores, and seasonal indices.
+*   **Operational Simulator**: Generates 6,000+ sequential records modeling monsoons, weather events, supplier delays, emergency projects, material shortages, inflation, holiday slowdowns, warehouse congestion, and transit strikes.
+*   **Centralized Configuration**: All variables are managed via [config/config.yaml](file:///c:/Users/kavsh/Desktop/POWERGRID/config/config.yaml).
+*   **Feature Stabilization**: Implements mathematically stable and capped equations for `Demand_Growth` and `Inventory_Coverage`.
+*   **Outlier & Missingness Treatment**: Imputation and standard IQR outlier Winsorization fit strictly on training splits to prevent data leakage.
 *   **Chronological Split**: Enforces sequential date splitting to prevent target leaks during future forecasting.
-*   **Automated Research Outputs**: Automatically compiles three research reports at runtime: Data Quality, Data Dictionary, and Pipeline Mermaid flow.
+*   **Automated Research Outputs**: Automatically compiles three research reports at runtime: Data Quality, Data Dictionary, and Pipeline Diagram.
 
 ---
 
-## 🛣️ Future Modules (70% Roadmap)
-
-To maintain strict scope, the following modules are **NOT** implemented in this phase, but are supported by Module 1's sequential preprocessing design:
-
-1.  **Decomposition Layer**: Parse `train_dataset.csv` sequences at the `[Warehouse, Material_Type]` level and apply Empirical Mode Decomposition (EMD) and Discrete Wavelet Transform (DWT) to resolve high-frequency supply noises.
-2.  **ML Forecasting**: Supply the engineered lags, cyclical dates, and season indices into regressors (MLP, LSTM, SVR, RandomForest, XGBoost, and LightGBM Quantile Regression) to predict future material requirements.
-3.  **Multi-Objective LP Optimization**: Feed the forecasted demand, supplier risk scores, and transportation costs into a `PuLP` solver using the CBC solver to optimize procurement, inventory levels, and logistics routes under constraints.
-
----
-
-## 🛠️ Installation & Setup
-
-1. Check that Python 3.10+ is installed:
-   ```bash
-   python --version
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 5. Completed Modules
+*   **Configuration Manager**: [settings.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/config/settings.py) dynamically reads environment constraints from YAML.
+*   **Operational Simulator**: [generator.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/data_generation/generator.py) generates operational scenario datasets.
+*   **Validation Suite**: [validator.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/validation/validator.py) tests ranges, categories, duplicates, and missing values.
+*   **Modular Preprocessing**: [cleaner.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/preprocessing/cleaner.py), [encoder.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/preprocessing/encoder.py), and [scaler.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/preprocessing/scaler.py) handle duplicates, imputations, capping, encoding, and scaling.
+*   **Feature Extraction**: [temporal.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/features/temporal.py) and [engineer.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/features/engineer.py) compute temporal and supply chain metrics.
+*   **Orchestrator Pipeline**: [pipeline.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/pipeline.py) manages the sequence.
 
 ---
 
-## 🚀 Execution Guide
+## 6. Architecture Diagram
 
-### 1. Run the Data Pipeline
-To execute the pipeline, run the root runner script. You can specify the categorical encoding method (`ordinal` or `onehot`):
+```
+c:\Users\kavsh\Desktop\POWERGRID\
+├── config/
+│   └── config.yaml           # Centralized configuration settings
+├── logs/
+│   └── pipeline.log          # Detailed execution logs
+├── reports/                  # Automatically generated MD and CSV reports
+├── src/                      # Source code directories
+│   ├── config/
+│   ├── data_generation/
+│   ├── preprocessing/
+│   ├── features/
+│   ├── validation/
+│   └── utils/
+├── tests/                    # Automated unit tests suite
+└── run_pipeline.py           # Pipeline runner entrypoint
+```
 
+---
+
+## 7. Pipeline Diagram
+
+```
+POWERGRID Dataset
+        │
+        ▼
+Data Validation
+        │
+        ▼
+Data Cleaning
+        │
+        ▼
+Feature Engineering
+        │
+        ▼
+Feature Summary
+        │
+        ▼
+Processed Dataset
+```
+
+For the detailed layout including train/val/test splits, see [reports/pipeline_diagram.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/pipeline_diagram.md).
+
+---
+
+## 8. Folder Structure
+For a detailed tree diagram of files, see [Architecture Diagram](#6-architecture-diagram).
+
+---
+
+## 9. Execution Instructions
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Run the Data Preprocessing Pipeline
 ```bash
 python run_pipeline.py [ordinal|onehot]
 ```
+*   `ordinal` (default): Optimal for gradient boosted tree models (XGBoost, RandomForest).
+*   `onehot`: Optimal for neural networks (MLP, LSTM) and SVR models.
 
-This will run the simulation, cleaning, feature engineering, and automatically generate all research CSVs and Markdown reports.
-
-### 2. Run Automated Unit Tests
-To run the validation test suite (verifying config loading, generator, cleaner, validator, and features):
-
+### 3. Run Automated Tests
+To run the automated validation tests:
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
 ---
 
-## 💾 Expected Deliverables
+## 10. Generated Reports
+Executing the pipeline dynamically updates:
+*   [reports/data_quality_report.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/data_quality_report.md): Validates raw vs cleaned values, nulls, duplicates, and outlier caps.
+*   [reports/data_dictionary.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/data_dictionary.md): Describes all 44 fields in detail.
+*   [reports/pipeline_diagram.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/pipeline_diagram.md): Displays pipeline flowcharts.
 
-Executing the pipeline outputs the following files:
+---
 
-*   **Processed Train/Val/Test Datasets**: `data/processed/train_dataset.csv`, `val_dataset.csv`, `test_dataset.csv`
-*   **Combined Dataset**: `data/processed/processed_dataset.csv`
-*   **Pipeline Log file**: `logs/pipeline.log`
-*   **Validation Check Log**: `reports/validation_report.csv` (pre- vs. post-cleaning logs)
-*   **Features Statistics**: `reports/feature_summary.csv`
-*   **Data Quality Report**: [reports/data_quality_report.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/data_quality_report.md)
-*   **Data Dictionary**: [reports/data_dictionary.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/data_dictionary.md)
-*   **Pipeline Mermaid Diagram**: [reports/pipeline_diagram.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/pipeline_diagram.md)
-*   **Serialized ML Objects**: `models/data_cleaner.joblib`, `feature_engineer.joblib`, `categorical_encoder.joblib`, `numerical_scaler.joblib`
+## 11. Future Work
+The completed Module 1 features are structured to feed future research modules:
+1.  **Decomposition (EMD & DWT)**: Apply EMD and DWT to clean lag sequences.
+2.  **ML Forecasting**: Train MLP, SVR, RandomForest, XGBoost, and LSTM algorithms on preprocessed variables.
+3.  **Multi-Objective LP Solver**: Supply predicted demands and risk scores into a `PuLP` solver to optimize procurement, inventory levels, and freight routes.

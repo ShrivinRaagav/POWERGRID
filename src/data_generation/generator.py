@@ -139,7 +139,10 @@ def generate_powergrid_data(num_rows: int = 6000) -> pd.DataFrame:
             proj = random.choice(wh_projects)
             meta = project_metadata[proj]
             is_emergency = meta["Is_Emergency"]
-            proj_budget = meta["Budget"]
+            
+            # --- operational scenario: Budget Cuts (e.g., from middle of 2024 onwards, weeks >= 78) ---
+            budget_cut_mult = 0.80 if date_idx >= 78 else 1.0
+            proj_budget = int(meta["Budget"] * budget_cut_mult)
             
             # --- operational scenario 1: Season & Weather ---
             month = dt.month

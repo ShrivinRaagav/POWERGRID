@@ -4,21 +4,42 @@ This report analyzes the raw grid logistics material planning dataset and valida
 
 ---
 
-## 1. Executive Summary
-
-| Metrics | Raw Dataset | Preprocessed / Cleaned Dataset | Change / Resolution |
-| :--- | :--- | :--- | :--- |
-| **Row Count** | 6060 | 4199 | Lost 1861 rows due to invalid dates and duplicates. |
-| **Column Count** | 22 | 44 | Increased from 22 to 44 after feature engineering. |
-| **Missing Values** | 225 | 0 | 100% missing values imputed using training median/mode. |
-| **Duplicate Rows** | 60 | 0 | Staged duplicate records removed. |
+## 1. Dataset Overview
+The dataset models transmission line material logistics for POWERGRID projects. It spans 3 years of weekly observations (156 weeks) mapping material demands (conductors, insulators, towers, transformers, etc.) across 5 geographical regions, 10 states, 10 warehouses, and 5 specialized suppliers. It captures operational realisms such as monsoon transport constraints, supply shortages, weather-related risks, project budget cuts, project accelerations, and transit strikes.
 
 ---
 
-## 2. Preprocessing & Outlier Summary
+## 2. Number of Records
+*   **Raw Dataset Size**: 6060 rows, 22 columns.
+*   **Cleaned/Preprocessed Dataset Size**: 4199 rows, 44 columns.
+*   **Split Allocation**:
+    *   *Training Split (70%)*: 4,199 rows
+    *   *Validation Split (15%)*: 872 rows
+    *   *Test Split (15%)*: 905 rows
 
-### Outlier Handling (Winsorization)
-To prevent extreme values from distorting future forecasting models (SVR, MLP, LSTM), numerical variables were capped using Interquartile Range (IQR) thresholds $[Q1 - 1.5\times\text{IQR}, Q3 + 1.5\times\text{IQR}]$ fit on the training partition:
+---
+
+## 3. Missing Values
+*   **Raw Missing Count**: 225 null values across variables `Lead_Time_Days`, `Historical_Demand`, `Current_Inventory`, `Weather`, and `Supplier_Risk`.
+*   **Imputation Strategy**: All null values were imputed based on the training split parameters to prevent data leakage (numerical columns imputed with training medians, categorical columns imputed with training modes).
+*   **Cleaned Missing Count**: 0 null values.
+
+---
+
+## 4. Duplicates Removed
+*   **Staged Duplicates in Raw Data**: 60 duplicate records.
+*   **Deduplication Strategy**: Rows containing identical variables were removed, resulting in 0 duplicate records in the preprocessed stage.
+
+---
+
+## 5. Invalid Values Corrected
+*   **Invalid Dates**: Detected and dropped rows containing unparseable date strings (such as "202-INVALID-DATE").
+*   **Invalid Categorical Labels**: Identified out-of-bounds strings (e.g. `Region` = "XX", `Project_Phase` = "Unknown Phase"). These entries were replaced with their corresponding training mode labels (e.g., region mapped to "NR", project phase mapped to "Planning").
+
+---
+
+## 6. Outlier Summary
+To prevent extreme numerical shocks from distorting forecast models (MLP, LSTM, SVR, etc.), outliers were capped using Interquartile Range (IQR) bounds $[Q1 - 1.5\times\text{IQR}, Q3 + 1.5\times\text{IQR}]$ fit on the training split:
 
 - **Historical_Demand**: 227 values adjusted/capped.
 - **Current_Inventory**: 104 values adjusted/capped.
@@ -28,31 +49,8 @@ To prevent extreme values from distorting future forecasting models (SVR, MLP, L
 
 ---
 
-## 3. Preprocessed Feature Statistics
-
-The following statistics describe the engineered features computed on the training partition:
-
-| Feature Name | Mean | Median | Std Dev | Min | Max |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Lag_1 | 281.7226 | 164.0000 | 311.5279 | 0.0000 | 1075.0000 |
-| Lag_2 | 278.0069 | 164.0000 | 308.2889 | 0.0000 | 1075.0000 |
-| Lag_3 | 274.3648 | 164.0000 | 305.1143 | 0.0000 | 1075.0000 |
-| Rolling_Mean_3 | 276.9069 | 164.0000 | 297.1950 | 0.0000 | 1075.0000 |
-| Rolling_Mean_6 | 270.3328 | 162.8333 | 288.4998 | 0.0000 | 1075.0000 |
-| Inventory_Utilization | 0.1188 | 0.0664 | 0.1274 | 0.0000 | 0.6434 |
-| Lead_Time_Category | 0.8133 | 1.0000 | 0.7248 | 0.0000 | 2.0000 |
-| Demand_Growth | 146987.9465 | 0.0000 | 2324812.7522 | -1.0000 | 107500000.0000 |
-| Inventory_Coverage | 6341646.5873 | 1.2734 | 34849848.7728 | 0.0000 | 243350000.0000 |
-| Budget_Utilization | 0.2348 | 0.1210 | 0.3009 | 0.0000 | 2.0541 |
-| Supplier_Risk_Score | 0.1551 | 0.1066 | 0.1389 | 0.0042 | 0.6499 |
-| Seasonal_Demand_Index | 1.0000 | 0.8691 | 0.3262 | 0.5772 | 1.6993 |
-| Transportation_Cost_Index | 0.4950 | 0.4500 | 0.2121 | 0.2000 | 1.2748 |
-
----
-
-## 4. Pipeline Validation Check Log
-
-Below is the record of validation tests run on the raw data (pre-cleaning) and the cleaned data (post-cleaning):
+## 7. Validation Summary
+The validation test log below shows pre-cleaning (raw stage) failures and post-cleaning (cleaned stage) successes:
 
 | Stage | Check Name | Column | Status | Violations | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -139,8 +137,29 @@ Below is the record of validation tests run on the raw data (pre-cleaning) and t
 
 ---
 
-## 5. Research Recommendations for Next Phase
+## 8. Feature Engineering Summary
+The following statistics describe the engineered variables computed on the training partition:
 
-1. **Discrete Wavelet Transform (DWT)**: Lags (`Lag_1`, `Lag_2`, `Lag_3`) and rolling means (`Rolling_Mean_3`, `Rolling_Mean_6`) are grouped at the `[Warehouse, Material_Type]` level. Apply DWT or EMD on each series individually to decompose high-frequency supply noises from long-term construction trends.
-2. **Sequential Formatting**: For deep learning models (LSTM), shape the preprocessed sequence splits (`train_dataset.csv`, `val_dataset.csv`, `test_dataset.csv`) into overlapping sliding windows (e.g. timesteps=4).
-3. **Linear Programming Optimization**: The output values of `Supplier_Risk_Score`, `Transportation_Cost_Index`, and predictions of `Quantity_Required` should be passed to `PuLP` to solve the multi-objective linear programming model via the CBC solver.
+| Feature Name | Mean | Median | Std Dev | Min | Max |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Lag_1 | 281.7226 | 164.0000 | 311.5279 | 0.0000 | 1075.0000 |
+| Lag_2 | 278.0069 | 164.0000 | 308.2889 | 0.0000 | 1075.0000 |
+| Lag_3 | 274.3648 | 164.0000 | 305.1143 | 0.0000 | 1075.0000 |
+| Rolling_Mean_3 | 276.9069 | 164.0000 | 297.1950 | 0.0000 | 1075.0000 |
+| Rolling_Mean_6 | 270.3328 | 162.8333 | 288.4998 | 0.0000 | 1075.0000 |
+| Inventory_Utilization | 0.1188 | 0.0664 | 0.1274 | 0.0000 | 0.6434 |
+| Lead_Time_Category | 0.8133 | 1.0000 | 0.7248 | 0.0000 | 2.0000 |
+| Demand_Growth | 0.1267 | 0.0000 | 0.6210 | -0.9984 | 2.0000 |
+| Inventory_Coverage | 10.5730 | 1.2478 | 17.9365 | 0.0000 | 52.0000 |
+| Budget_Utilization | 0.2569 | 0.1309 | 0.3318 | 0.0000 | 2.2909 |
+| Supplier_Risk_Score | 0.1551 | 0.1066 | 0.1389 | 0.0042 | 0.6499 |
+| Seasonal_Demand_Index | 1.0000 | 0.8691 | 0.3262 | 0.5772 | 1.6993 |
+| Transportation_Cost_Index | 0.4950 | 0.4500 | 0.2121 | 0.2000 | 1.2748 |
+
+---
+
+## 9. Final Dataset Quality Assessment
+The preprocessed dataset is determined to be of **research-quality** and ready for model training:
+1. **Mathematical Stability**: Exploding variables in `Demand_Growth` and `Inventory_Coverage` have been stabilized and capped.
+2. **Leakage Protection**: All imputation, scaling, and categorical encoding parameters were fit strictly on the training partition and applied to validation/test partitions chronologically.
+3. **Completeness**: No missing values, duplicate records, negative inventories, or invalid categorical classes remain.

@@ -45,7 +45,7 @@ This document details all columns in the processed datasets (`train_dataset.csv`
 | **Inventory_Utilization** | `float64` | Warehouse capacity utilization rate. | 0.0 to 1.0 | 0.5393 | Logistics bottlenecks and storage allocation planning. |
 | **Lead_Time_Category** | `int32` | Binned lead time intervals. | 0 (Short), 1 (Medium), 2 (Long) | 1 | Decision parameters for inventory replenishment trigger. |
 | **Demand_Growth** | `float64` | Relative change rate between Lag_1 and Lag_2. | -inf to inf | 0.0000 | Trend indicator for gradient boosting regressors. |
-| **Inventory_Coverage** | `float64` | Number of periods current stock will cover demand. | 0.0 to inf | 12.0061 | Safety stock optimization constraints. |
+| **Inventory_Coverage** | `float64` | Number of periods current stock will cover demand. | 0.0 to inf | 11.9333 | Safety stock optimization constraints. |
 | **Budget_Utilization** | `float64` | Estimated spending relative to project budget. | 0.0 to inf | 0.0747 | Financial constraint checks. |
 | **Supplier_Risk_Score** | `float64` | Composite supplier risk index. | 0.0 to inf (lower is safer) | 0.0964 | Risk minimization objective function in LP model. |
 | **Seasonal_Demand_Index** | `float64` | Historical demand ratio of material in the season. | 0.0 to 2.5 | 1.2272 | Seasonality multipliers for regression models. |

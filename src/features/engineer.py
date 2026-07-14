@@ -102,11 +102,11 @@ class FeatureEngineer:
             labels=[0, 1, 2]
         ).astype(np.int32)
         
-        # Demand Growth Rate: (Lag_1 - Lag_2) / (Lag_2 + epsilon)
-        df_out["Demand_Growth"] = (df_out["Lag_1"] - df_out["Lag_2"]) / (df_out["Lag_2"] + 1e-5)
+        # Demand Growth Rate: (Lag_1 - Lag_2) / (Lag_2 + 1.0) stabilized and clipped to prevent exploding values
+        df_out["Demand_Growth"] = np.clip((df_out["Lag_1"] - df_out["Lag_2"]) / (df_out["Lag_2"] + 1.0), -2.0, 2.0)
         
-        # Inventory Coverage: Current Inventory / Rolling Mean Demand (how many periods of demand we cover)
-        df_out["Inventory_Coverage"] = df_out["Current_Inventory"] / (df_out["Rolling_Mean_3"] + 1e-5)
+        # Inventory Coverage: Current Inventory / (Rolling_Mean_3 + 1.0) stabilized and clipped to maximum 52 weeks (1 year)
+        df_out["Inventory_Coverage"] = np.clip(df_out["Current_Inventory"] / (df_out["Rolling_Mean_3"] + 1.0), 0.0, 52.0)
         
         # Budget Utilization: (Lag_1 * (Price + Transport)) / Project Budget
         # Using Lag_1 demand here is realistic for feature engineering to avoid lookahead leakage
