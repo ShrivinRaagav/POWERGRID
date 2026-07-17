@@ -754,3 +754,336 @@ ValueError: Can only compare identically-labeled Series objects
 [2026-07-14 22:44:02] INFO [pipeline.run_pipeline:239]: POWERGRID ML DATA PIPELINE COMPLETED IN 3.6852s
 [2026-07-14 22:44:02] INFO [pipeline.run_pipeline:240]: =========================================
 [2026-07-14 22:44:02] INFO [runner.main:25]: Pipeline executed successfully!
+[2026-07-14 23:04:47] INFO [runner.main:21]: Starting pipeline execution with categorical encoding method: 'ordinal'
+[2026-07-14 23:04:47] INFO [pipeline.run_pipeline:79]: =========================================
+[2026-07-14 23:04:47] INFO [pipeline.run_pipeline:80]: POWERGRID ML DATA PIPELINE STARTED
+[2026-07-14 23:04:47] INFO [pipeline.run_pipeline:81]: =========================================
+[2026-07-14 23:04:47] INFO [pipeline.run_pipeline:94]: Loading existing raw data from C:\Users\kavsh\Desktop\POWERGRID\data\raw\raw_dataset.csv...
+[2026-07-14 23:04:48] INFO [pipeline.run_pipeline:97]: Stage 'Data Generation / Load' completed in 0.0389s. Records: 6060
+[2026-07-14 23:04:48] INFO [validator.run_data_validation:24]: Running data validation checks for stage: raw on 6060 rows...
+[2026-07-14 23:04:48] INFO [validator.run_data_validation:139]: Validation completed. 12 checks failed.
+[2026-07-14 23:04:48] INFO [pipeline.run_pipeline:108]: Stage 'Raw Validation' completed in 0.0464s.
+[2026-07-14 23:04:48] INFO [pipeline.split_data_chronologically:32]: Performing chronological split of dataset...
+[2026-07-14 23:04:48] INFO [pipeline.split_data_chronologically:57]: Split results:
+[2026-07-14 23:04:48] INFO [pipeline.split_data_chronologically:58]:   Train set: 4239 rows (109 weeks)
+[2026-07-14 23:04:48] INFO [pipeline.split_data_chronologically:59]:   Val set:   883 rows (23 weeks)
+[2026-07-14 23:04:48] INFO [pipeline.split_data_chronologically:60]:   Test set:  914 rows (24 weeks)
+[2026-07-14 23:04:48] INFO [pipeline.run_pipeline:115]: Stage 'Chronological Split' completed in 0.0253s.
+[2026-07-14 23:04:48] INFO [cleaner.fit:33]: Fitting cleaner on training dataset...
+[2026-07-14 23:04:48] INFO [cleaner.fit:65]: Cleaner fitted successfully.
+[2026-07-14 23:04:48] INFO [cleaner.transform:74]: Transforming dataset with shape (4239, 22)...
+[2026-07-14 23:04:48] INFO [cleaner.transform:82]: Removed 40 exact duplicate records.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:107]: Replacing 14 invalid region values with mode: 'NR'.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:112]: Replacing 12 invalid project phase values with mode: 'Planning'.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:130]: Resetting 12 negative values in Historical_Demand to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 35 missing values in Historical_Demand with median (154.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 180 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-14 23:04:48] WARNING [cleaner.transform:130]: Resetting 15 negative values in Current_Inventory to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 20 missing values in Current_Inventory with median (352.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 69 outliers in Current_Inventory to range [0.00, 2433.50].
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 35 missing values in Lead_Time_Days with median (44.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 52 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 35 missing values in Supplier_Risk with median (0.23).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 258 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 260 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-14 23:04:48] WARNING [cleaner.transform:158]: Resetting 12 negative values in Quantity_Required to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:173]: Capping 183 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-14 23:04:48] INFO [cleaner.transform:176]: Transformation complete. Output shape: (4199, 22)
+[2026-07-14 23:04:48] INFO [cleaner.transform:74]: Transforming dataset with shape (883, 22)...
+[2026-07-14 23:04:48] INFO [cleaner.transform:82]: Removed 11 exact duplicate records.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:107]: Replacing 1 invalid region values with mode: 'NR'.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:112]: Replacing 3 invalid project phase values with mode: 'Planning'.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:130]: Resetting 1 negative values in Historical_Demand to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 4 missing values in Historical_Demand with median (154.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 131 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-14 23:04:48] WARNING [cleaner.transform:130]: Resetting 1 negative values in Current_Inventory to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 4 missing values in Current_Inventory with median (352.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 25 outliers in Current_Inventory to range [0.00, 2433.50].
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 5 missing values in Lead_Time_Days with median (44.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 12 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 5 missing values in Supplier_Risk with median (0.23).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 1 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 47 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-14 23:04:48] WARNING [cleaner.transform:158]: Resetting 1 negative values in Quantity_Required to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:173]: Capping 131 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-14 23:04:48] INFO [cleaner.transform:176]: Transformation complete. Output shape: (872, 22)
+[2026-07-14 23:04:48] INFO [cleaner.transform:74]: Transforming dataset with shape (914, 22)...
+[2026-07-14 23:04:48] INFO [cleaner.transform:82]: Removed 9 exact duplicate records.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:107]: Replacing 3 invalid region values with mode: 'NR'.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:112]: Replacing 3 invalid project phase values with mode: 'Planning'.
+[2026-07-14 23:04:48] WARNING [cleaner.transform:130]: Resetting 5 negative values in Historical_Demand to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 8 missing values in Historical_Demand with median (154.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 15 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-14 23:04:48] WARNING [cleaner.transform:130]: Resetting 2 negative values in Current_Inventory to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 6 missing values in Current_Inventory with median (352.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 8 missing values in Lead_Time_Days with median (44.00).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 5 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-14 23:04:48] INFO [cleaner.transform:136]: Imputing 8 missing values in Supplier_Risk with median (0.23).
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 1 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-14 23:04:48] INFO [cleaner.transform:148]: Capping 38 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-14 23:04:48] WARNING [cleaner.transform:158]: Resetting 5 negative values in Quantity_Required to 0.
+[2026-07-14 23:04:48] INFO [cleaner.transform:173]: Capping 15 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-14 23:04:48] INFO [cleaner.transform:176]: Transformation complete. Output shape: (905, 22)
+[2026-07-14 23:04:48] INFO [pipeline.run_pipeline:132]: Stage 'Data Cleaning' completed in 0.2456s. Records removed: 84
+[2026-07-14 23:04:48] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-14 23:04:48] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-14 23:04:48] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-14 23:04:48] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-14 23:04:48] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-14 23:04:48] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-14 23:04:48] INFO [pipeline.run_pipeline:141]: Stage 'Temporal Feature Extraction' completed in 0.0467s.
+[2026-07-14 23:04:48] INFO [engineer.fit:27]: Fitting FeatureEngineer on training dataset...
+[2026-07-14 23:04:48] INFO [engineer.fit:56]: FeatureEngineer fitted successfully.
+[2026-07-14 23:04:48] INFO [engineer.transform:65]: Engineering features on dataset of shape (4199, 31)...
+[2026-07-14 23:04:48] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (4199, 44)
+[2026-07-14 23:04:48] INFO [engineer.transform:65]: Engineering features on dataset of shape (872, 31)...
+[2026-07-14 23:04:49] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (872, 44)
+[2026-07-14 23:04:49] INFO [engineer.transform:65]: Engineering features on dataset of shape (905, 31)...
+[2026-07-14 23:04:49] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (905, 44)
+[2026-07-14 23:04:49] INFO [pipeline.run_pipeline:162]: Stage 'Domain Feature Engineering' completed in 0.8734s. Features created: 13
+[2026-07-14 23:04:49] INFO [encoder.fit:38]: Fitting ordinal encoder on 4199 rows...
+[2026-07-14 23:04:49] INFO [encoder.fit:72]: Ordinal encoder successfully fitted.
+[2026-07-14 23:04:49] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-14 23:04:49] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-14 23:04:49] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-14 23:04:49] INFO [encoder.save:117]: Encoder saved to C:\Users\kavsh\Desktop\POWERGRID\models\categorical_encoder.joblib
+[2026-07-14 23:04:49] INFO [pipeline.run_pipeline:175]: Stage 'Categorical Encoding' completed in 0.0497s.
+[2026-07-14 23:04:49] INFO [scaler.fit:27]: Fitting StandardScaler on 4199 rows...
+[2026-07-14 23:04:49] INFO [scaler.fit:39]: Scaler successfully fitted.
+[2026-07-14 23:04:49] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-14 23:04:49] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-14 23:04:49] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-14 23:04:49] INFO [scaler.save:68]: Scaler saved to C:\Users\kavsh\Desktop\POWERGRID\models\numerical_scaler.joblib
+[2026-07-14 23:04:49] INFO [pipeline.run_pipeline:188]: Stage 'Numerical Scaling' completed in 0.0254s.
+[2026-07-14 23:04:49] INFO [validator.run_data_validation:24]: Running data validation checks for stage: cleaned on 4199 rows...
+[2026-07-14 23:04:49] INFO [validator.run_data_validation:139]: Validation completed. 0 checks failed.
+[2026-07-14 23:04:49] INFO [validator.save_validation_report:145]: Validation report saved to: C:\Users\kavsh\Desktop\POWERGRID\reports\validation_report.csv
+[2026-07-14 23:04:49] INFO [pipeline.run_pipeline:199]: Stage 'Clean Validation' completed in 0.0423s.
+[2026-07-14 23:04:50] INFO [pipeline.run_pipeline:213]: Generating markdown reports (Data Quality, Data Dictionary, Pipeline Diagram)...
+[2026-07-14 23:04:50] INFO [pipeline.run_pipeline:234]: Stage 'Reports Generation' completed in 0.1839s.
+[2026-07-14 23:04:50] INFO [pipeline.run_pipeline:238]: =========================================
+[2026-07-14 23:04:50] INFO [pipeline.run_pipeline:239]: POWERGRID ML DATA PIPELINE COMPLETED IN 2.3512s
+[2026-07-14 23:04:50] INFO [pipeline.run_pipeline:240]: =========================================
+[2026-07-14 23:04:50] INFO [runner.main:25]: Pipeline executed successfully!
+[2026-07-15 09:38:08] INFO [runner.main:21]: Starting pipeline execution with categorical encoding method: 'ordinal'
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:79]: =========================================
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:80]: POWERGRID ML DATA PIPELINE STARTED
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:81]: =========================================
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:94]: Loading existing raw data from C:\Users\kavsh\Desktop\POWERGRID\data\raw\raw_dataset.csv...
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:97]: Stage 'Data Generation / Load' completed in 0.0595s. Records: 6060
+[2026-07-15 09:38:08] INFO [validator.run_data_validation:24]: Running data validation checks for stage: raw on 6060 rows...
+[2026-07-15 09:38:08] INFO [validator.run_data_validation:139]: Validation completed. 12 checks failed.
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:108]: Stage 'Raw Validation' completed in 0.0559s.
+[2026-07-15 09:38:08] INFO [pipeline.split_data_chronologically:32]: Performing chronological split of dataset...
+[2026-07-15 09:38:08] INFO [pipeline.split_data_chronologically:57]: Split results:
+[2026-07-15 09:38:08] INFO [pipeline.split_data_chronologically:58]:   Train set: 4239 rows (109 weeks)
+[2026-07-15 09:38:08] INFO [pipeline.split_data_chronologically:59]:   Val set:   883 rows (23 weeks)
+[2026-07-15 09:38:08] INFO [pipeline.split_data_chronologically:60]:   Test set:  914 rows (24 weeks)
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:115]: Stage 'Chronological Split' completed in 0.0325s.
+[2026-07-15 09:38:08] INFO [cleaner.fit:33]: Fitting cleaner on training dataset...
+[2026-07-15 09:38:08] INFO [cleaner.fit:65]: Cleaner fitted successfully.
+[2026-07-15 09:38:08] INFO [cleaner.transform:74]: Transforming dataset with shape (4239, 22)...
+[2026-07-15 09:38:08] INFO [cleaner.transform:82]: Removed 40 exact duplicate records.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:107]: Replacing 14 invalid region values with mode: 'NR'.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:112]: Replacing 12 invalid project phase values with mode: 'Planning'.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:130]: Resetting 12 negative values in Historical_Demand to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 35 missing values in Historical_Demand with median (154.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 180 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-15 09:38:08] WARNING [cleaner.transform:130]: Resetting 15 negative values in Current_Inventory to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 20 missing values in Current_Inventory with median (352.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 69 outliers in Current_Inventory to range [0.00, 2433.50].
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 35 missing values in Lead_Time_Days with median (44.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 52 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 35 missing values in Supplier_Risk with median (0.23).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 258 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 260 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-15 09:38:08] WARNING [cleaner.transform:158]: Resetting 12 negative values in Quantity_Required to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:173]: Capping 183 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-15 09:38:08] INFO [cleaner.transform:176]: Transformation complete. Output shape: (4199, 22)
+[2026-07-15 09:38:08] INFO [cleaner.transform:74]: Transforming dataset with shape (883, 22)...
+[2026-07-15 09:38:08] INFO [cleaner.transform:82]: Removed 11 exact duplicate records.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:107]: Replacing 1 invalid region values with mode: 'NR'.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:112]: Replacing 3 invalid project phase values with mode: 'Planning'.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:130]: Resetting 1 negative values in Historical_Demand to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 4 missing values in Historical_Demand with median (154.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 131 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-15 09:38:08] WARNING [cleaner.transform:130]: Resetting 1 negative values in Current_Inventory to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 4 missing values in Current_Inventory with median (352.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 25 outliers in Current_Inventory to range [0.00, 2433.50].
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 5 missing values in Lead_Time_Days with median (44.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 12 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 5 missing values in Supplier_Risk with median (0.23).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 1 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 47 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-15 09:38:08] WARNING [cleaner.transform:158]: Resetting 1 negative values in Quantity_Required to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:173]: Capping 131 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-15 09:38:08] INFO [cleaner.transform:176]: Transformation complete. Output shape: (872, 22)
+[2026-07-15 09:38:08] INFO [cleaner.transform:74]: Transforming dataset with shape (914, 22)...
+[2026-07-15 09:38:08] INFO [cleaner.transform:82]: Removed 9 exact duplicate records.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:107]: Replacing 3 invalid region values with mode: 'NR'.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:112]: Replacing 3 invalid project phase values with mode: 'Planning'.
+[2026-07-15 09:38:08] WARNING [cleaner.transform:130]: Resetting 5 negative values in Historical_Demand to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 8 missing values in Historical_Demand with median (154.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 15 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-15 09:38:08] WARNING [cleaner.transform:130]: Resetting 2 negative values in Current_Inventory to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 6 missing values in Current_Inventory with median (352.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 8 missing values in Lead_Time_Days with median (44.00).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 5 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-15 09:38:08] INFO [cleaner.transform:136]: Imputing 8 missing values in Supplier_Risk with median (0.23).
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 1 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-15 09:38:08] INFO [cleaner.transform:148]: Capping 38 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-15 09:38:08] WARNING [cleaner.transform:158]: Resetting 5 negative values in Quantity_Required to 0.
+[2026-07-15 09:38:08] INFO [cleaner.transform:173]: Capping 15 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-15 09:38:08] INFO [cleaner.transform:176]: Transformation complete. Output shape: (905, 22)
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:132]: Stage 'Data Cleaning' completed in 0.3172s. Records removed: 84
+[2026-07-15 09:38:08] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-15 09:38:08] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-15 09:38:08] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-15 09:38:08] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-15 09:38:08] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-15 09:38:08] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-15 09:38:08] INFO [pipeline.run_pipeline:141]: Stage 'Temporal Feature Extraction' completed in 0.0518s.
+[2026-07-15 09:38:08] INFO [engineer.fit:27]: Fitting FeatureEngineer on training dataset...
+[2026-07-15 09:38:08] INFO [engineer.fit:56]: FeatureEngineer fitted successfully.
+[2026-07-15 09:38:08] INFO [engineer.transform:65]: Engineering features on dataset of shape (4199, 31)...
+[2026-07-15 09:38:09] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (4199, 44)
+[2026-07-15 09:38:09] INFO [engineer.transform:65]: Engineering features on dataset of shape (872, 31)...
+[2026-07-15 09:38:09] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (872, 44)
+[2026-07-15 09:38:09] INFO [engineer.transform:65]: Engineering features on dataset of shape (905, 31)...
+[2026-07-15 09:38:09] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (905, 44)
+[2026-07-15 09:38:09] INFO [pipeline.run_pipeline:162]: Stage 'Domain Feature Engineering' completed in 0.9325s. Features created: 13
+[2026-07-15 09:38:09] INFO [encoder.fit:38]: Fitting ordinal encoder on 4199 rows...
+[2026-07-15 09:38:09] INFO [encoder.fit:72]: Ordinal encoder successfully fitted.
+[2026-07-15 09:38:09] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-15 09:38:09] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-15 09:38:09] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-15 09:38:09] INFO [encoder.save:117]: Encoder saved to C:\Users\kavsh\Desktop\POWERGRID\models\categorical_encoder.joblib
+[2026-07-15 09:38:09] INFO [pipeline.run_pipeline:175]: Stage 'Categorical Encoding' completed in 0.0794s.
+[2026-07-15 09:38:09] INFO [scaler.fit:27]: Fitting StandardScaler on 4199 rows...
+[2026-07-15 09:38:09] INFO [scaler.fit:39]: Scaler successfully fitted.
+[2026-07-15 09:38:09] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-15 09:38:09] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-15 09:38:09] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-15 09:38:09] INFO [scaler.save:68]: Scaler saved to C:\Users\kavsh\Desktop\POWERGRID\models\numerical_scaler.joblib
+[2026-07-15 09:38:09] INFO [pipeline.run_pipeline:188]: Stage 'Numerical Scaling' completed in 0.0358s.
+[2026-07-15 09:38:09] INFO [validator.run_data_validation:24]: Running data validation checks for stage: cleaned on 4199 rows...
+[2026-07-15 09:38:09] INFO [validator.run_data_validation:139]: Validation completed. 0 checks failed.
+[2026-07-15 09:38:09] INFO [validator.save_validation_report:145]: Validation report saved to: C:\Users\kavsh\Desktop\POWERGRID\reports\validation_report.csv
+[2026-07-15 09:38:09] INFO [pipeline.run_pipeline:199]: Stage 'Clean Validation' completed in 0.0535s.
+[2026-07-15 09:38:10] INFO [pipeline.run_pipeline:213]: Generating markdown reports (Data Quality, Data Dictionary, Pipeline Diagram)...
+[2026-07-15 09:38:10] INFO [pipeline.run_pipeline:234]: Stage 'Reports Generation' completed in 0.1903s.
+[2026-07-15 09:38:10] INFO [pipeline.run_pipeline:238]: =========================================
+[2026-07-15 09:38:10] INFO [pipeline.run_pipeline:239]: POWERGRID ML DATA PIPELINE COMPLETED IN 2.5385s
+[2026-07-15 09:38:10] INFO [pipeline.run_pipeline:240]: =========================================
+[2026-07-15 09:38:10] INFO [runner.main:25]: Pipeline executed successfully!
+[2026-07-15 11:28:29] INFO [runner.main:21]: Starting pipeline execution with categorical encoding method: 'ordinal'
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:79]: =========================================
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:80]: POWERGRID ML DATA PIPELINE STARTED
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:81]: =========================================
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:94]: Loading existing raw data from C:\Users\kavsh\Desktop\POWERGRID\data\raw\raw_dataset.csv...
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:97]: Stage 'Data Generation / Load' completed in 0.0433s. Records: 6060
+[2026-07-15 11:28:29] INFO [validator.run_data_validation:24]: Running data validation checks for stage: raw on 6060 rows...
+[2026-07-15 11:28:29] INFO [validator.run_data_validation:139]: Validation completed. 12 checks failed.
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:108]: Stage 'Raw Validation' completed in 0.0426s.
+[2026-07-15 11:28:29] INFO [pipeline.split_data_chronologically:32]: Performing chronological split of dataset...
+[2026-07-15 11:28:29] INFO [pipeline.split_data_chronologically:57]: Split results:
+[2026-07-15 11:28:29] INFO [pipeline.split_data_chronologically:58]:   Train set: 4239 rows (109 weeks)
+[2026-07-15 11:28:29] INFO [pipeline.split_data_chronologically:59]:   Val set:   883 rows (23 weeks)
+[2026-07-15 11:28:29] INFO [pipeline.split_data_chronologically:60]:   Test set:  914 rows (24 weeks)
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:115]: Stage 'Chronological Split' completed in 0.0276s.
+[2026-07-15 11:28:29] INFO [cleaner.fit:33]: Fitting cleaner on training dataset...
+[2026-07-15 11:28:29] INFO [cleaner.fit:65]: Cleaner fitted successfully.
+[2026-07-15 11:28:29] INFO [cleaner.transform:74]: Transforming dataset with shape (4239, 22)...
+[2026-07-15 11:28:29] INFO [cleaner.transform:82]: Removed 40 exact duplicate records.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:107]: Replacing 14 invalid region values with mode: 'NR'.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:112]: Replacing 12 invalid project phase values with mode: 'Planning'.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:130]: Resetting 12 negative values in Historical_Demand to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 35 missing values in Historical_Demand with median (154.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 180 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-15 11:28:29] WARNING [cleaner.transform:130]: Resetting 15 negative values in Current_Inventory to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 20 missing values in Current_Inventory with median (352.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 69 outliers in Current_Inventory to range [0.00, 2433.50].
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 35 missing values in Lead_Time_Days with median (44.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 52 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 35 missing values in Supplier_Risk with median (0.23).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 258 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 260 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-15 11:28:29] WARNING [cleaner.transform:158]: Resetting 12 negative values in Quantity_Required to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:173]: Capping 183 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-15 11:28:29] INFO [cleaner.transform:176]: Transformation complete. Output shape: (4199, 22)
+[2026-07-15 11:28:29] INFO [cleaner.transform:74]: Transforming dataset with shape (883, 22)...
+[2026-07-15 11:28:29] INFO [cleaner.transform:82]: Removed 11 exact duplicate records.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:107]: Replacing 1 invalid region values with mode: 'NR'.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:112]: Replacing 3 invalid project phase values with mode: 'Planning'.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:130]: Resetting 1 negative values in Historical_Demand to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 4 missing values in Historical_Demand with median (154.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 131 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-15 11:28:29] WARNING [cleaner.transform:130]: Resetting 1 negative values in Current_Inventory to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 4 missing values in Current_Inventory with median (352.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 25 outliers in Current_Inventory to range [0.00, 2433.50].
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 5 missing values in Lead_Time_Days with median (44.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 12 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 5 missing values in Supplier_Risk with median (0.23).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 1 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 47 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-15 11:28:29] WARNING [cleaner.transform:158]: Resetting 1 negative values in Quantity_Required to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:173]: Capping 131 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-15 11:28:29] INFO [cleaner.transform:176]: Transformation complete. Output shape: (872, 22)
+[2026-07-15 11:28:29] INFO [cleaner.transform:74]: Transforming dataset with shape (914, 22)...
+[2026-07-15 11:28:29] INFO [cleaner.transform:82]: Removed 9 exact duplicate records.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:107]: Replacing 3 invalid region values with mode: 'NR'.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:112]: Replacing 3 invalid project phase values with mode: 'Planning'.
+[2026-07-15 11:28:29] WARNING [cleaner.transform:130]: Resetting 5 negative values in Historical_Demand to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 8 missing values in Historical_Demand with median (154.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 15 outliers in Historical_Demand to range [0.00, 1014.00].
+[2026-07-15 11:28:29] WARNING [cleaner.transform:130]: Resetting 2 negative values in Current_Inventory to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 6 missing values in Current_Inventory with median (352.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 8 missing values in Lead_Time_Days with median (44.00).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 5 outliers in Lead_Time_Days to range [0.00, 112.50].
+[2026-07-15 11:28:29] INFO [cleaner.transform:136]: Imputing 8 missing values in Supplier_Risk with median (0.23).
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 1 outliers in Supplier_Risk to range [-0.07, 0.58].
+[2026-07-15 11:28:29] INFO [cleaner.transform:148]: Capping 38 outliers in Transportation_Cost to range [-10.01, 117.70].
+[2026-07-15 11:28:29] WARNING [cleaner.transform:158]: Resetting 5 negative values in Quantity_Required to 0.
+[2026-07-15 11:28:29] INFO [cleaner.transform:173]: Capping 15 outliers in Quantity_Required to range [0.00, 1075.00].
+[2026-07-15 11:28:29] INFO [cleaner.transform:176]: Transformation complete. Output shape: (905, 22)
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:132]: Stage 'Data Cleaning' completed in 0.2442s. Records removed: 84
+[2026-07-15 11:28:29] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-15 11:28:29] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-15 11:28:29] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-15 11:28:29] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-15 11:28:29] INFO [temporal.extract_temporal_features:21]: Extracting temporal features from Date column...
+[2026-07-15 11:28:29] INFO [temporal.extract_temporal_features:46]: Temporal and cyclical features successfully extracted.
+[2026-07-15 11:28:29] INFO [pipeline.run_pipeline:141]: Stage 'Temporal Feature Extraction' completed in 0.0487s.
+[2026-07-15 11:28:29] INFO [engineer.fit:27]: Fitting FeatureEngineer on training dataset...
+[2026-07-15 11:28:30] INFO [engineer.fit:56]: FeatureEngineer fitted successfully.
+[2026-07-15 11:28:30] INFO [engineer.transform:65]: Engineering features on dataset of shape (4199, 31)...
+[2026-07-15 11:28:30] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (4199, 44)
+[2026-07-15 11:28:30] INFO [engineer.transform:65]: Engineering features on dataset of shape (872, 31)...
+[2026-07-15 11:28:30] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (872, 44)
+[2026-07-15 11:28:30] INFO [engineer.transform:65]: Engineering features on dataset of shape (905, 31)...
+[2026-07-15 11:28:30] INFO [engineer.transform:132]: Feature engineering completed. Output shape: (905, 44)
+[2026-07-15 11:28:30] INFO [pipeline.run_pipeline:162]: Stage 'Domain Feature Engineering' completed in 0.8837s. Features created: 13
+[2026-07-15 11:28:30] INFO [encoder.fit:38]: Fitting ordinal encoder on 4199 rows...
+[2026-07-15 11:28:30] INFO [encoder.fit:72]: Ordinal encoder successfully fitted.
+[2026-07-15 11:28:30] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-15 11:28:30] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-15 11:28:30] INFO [encoder.transform:84]: Transforming categorical features using ordinal...
+[2026-07-15 11:28:30] INFO [encoder.save:117]: Encoder saved to C:\Users\kavsh\Desktop\POWERGRID\models\categorical_encoder.joblib
+[2026-07-15 11:28:30] INFO [pipeline.run_pipeline:175]: Stage 'Categorical Encoding' completed in 0.0569s.
+[2026-07-15 11:28:30] INFO [scaler.fit:27]: Fitting StandardScaler on 4199 rows...
+[2026-07-15 11:28:30] INFO [scaler.fit:39]: Scaler successfully fitted.
+[2026-07-15 11:28:30] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-15 11:28:30] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-15 11:28:30] INFO [scaler.transform:51]: Scaling numerical features...
+[2026-07-15 11:28:30] INFO [scaler.save:68]: Scaler saved to C:\Users\kavsh\Desktop\POWERGRID\models\numerical_scaler.joblib
+[2026-07-15 11:28:30] INFO [pipeline.run_pipeline:188]: Stage 'Numerical Scaling' completed in 0.0260s.
+[2026-07-15 11:28:30] INFO [validator.run_data_validation:24]: Running data validation checks for stage: cleaned on 4199 rows...
+[2026-07-15 11:28:30] INFO [validator.run_data_validation:139]: Validation completed. 0 checks failed.
+[2026-07-15 11:28:30] INFO [validator.save_validation_report:145]: Validation report saved to: C:\Users\kavsh\Desktop\POWERGRID\reports\validation_report.csv
+[2026-07-15 11:28:30] INFO [pipeline.run_pipeline:199]: Stage 'Clean Validation' completed in 0.0461s.
+[2026-07-15 11:28:31] INFO [pipeline.run_pipeline:213]: Generating markdown reports (Data Quality, Data Dictionary, Pipeline Diagram)...
+[2026-07-15 11:28:31] INFO [pipeline.run_pipeline:234]: Stage 'Reports Generation' completed in 0.1858s.
+[2026-07-15 11:28:31] INFO [pipeline.run_pipeline:238]: =========================================
+[2026-07-15 11:28:31] INFO [pipeline.run_pipeline:239]: POWERGRID ML DATA PIPELINE COMPLETED IN 2.4229s
+[2026-07-15 11:28:31] INFO [pipeline.run_pipeline:240]: =========================================
+[2026-07-15 11:28:31] INFO [runner.main:25]: Pipeline executed successfully!
