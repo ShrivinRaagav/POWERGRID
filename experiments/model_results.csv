@@ -1,0 +1,5 @@
+Timestamp,Model Name,Hyperparameters,Training Time,Inference Time,MAE,RMSE,MAPE,SMAPE,R2,Pinball Loss,Dataset Version,Feature Set Version,Random Seed,Git Commit,Status,Notes
+2026-07-17T13:01:50.902713,mock_test,"{""n_estimators"": 50}",1.500000,0.020000,0.050000,0.100000,N/A,N/A,0.950000,N/A,DS-test,v1.0,42,12b158eceb61bea639bbd3f53b2c098d84f58166,Success,
+2026-07-17T13:03:58.689245,mock_model,"{""constant_value"": 0.0, ""random_noise_std"": 0.1}",0.000405,0.000218,332.292088,406.108761,249532241.202538,72.939663,-0.002214,N/A,DS-b89f14e80f13,v1.0,42,12b158eceb61bea639bbd3f53b2c098d84f58166,Success,Verification run for ML infrastructure and mock forecasting model
+2026-07-17T13:06:35.108620,mock_test,"{""n_estimators"": 50}",1.500000,0.020000,0.050000,0.100000,N/A,N/A,0.950000,N/A,DS-test,v1.0,42,12b158eceb61bea639bbd3f53b2c098d84f58166,Success,
+2026-07-17T13:12:35.169498,mock_model,"{""constant_value"": 0.0, ""random_noise_std"": 0.1}",0.001285,0.000206,332.292088,406.108761,249532241.202538,72.939663,-0.002214,N/A,DS-b89f14e80f13,v1.0,42,12b158eceb61bea639bbd3f53b2c098d84f58166,Success,Dry-run verification of model registry and logger

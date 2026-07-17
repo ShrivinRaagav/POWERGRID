@@ -92,3 +92,80 @@ NUMERICAL_COLS = [
     "Production_Capacity",
     "Project_Budget"
 ]
+
+# =====================================================================
+# MODULE 2: TIME-SERIES ANALYSIS PARAMETERS
+# =====================================================================
+TS_CONFIG = config.get("time_series", {})
+TS_GROUP_BY = TS_CONFIG.get("group_by", ["Material_Type", "Region"])
+TS_DATE_COL = TS_CONFIG.get("date_col", "Date")
+TS_TARGET_COL = TS_CONFIG.get("target_col", "Quantity_Required")
+TS_FREQ = TS_CONFIG.get("freq", "W-SUN")
+TS_FILL_METHOD = TS_CONFIG.get("fill_method", "zero")
+
+# DWT settings
+TS_DWT_WAVELET = TS_CONFIG.get("dwt", {}).get("wavelet", "db4")
+TS_DWT_LEVEL = int(TS_CONFIG.get("dwt", {}).get("level", 3))
+TS_DWT_OUTPUT_PATH = BASE_DIR / TS_CONFIG.get("dwt", {}).get("output_path", "artifacts/dwt_transform.joblib")
+
+# EMD settings
+TS_EMD_SPLINE = TS_CONFIG.get("emd", {}).get("spline_kind", "cubic")
+TS_EMD_MAX_IMFS = int(TS_CONFIG.get("emd", {}).get("max_imfs", 5))
+TS_EMD_STD_THR = float(TS_CONFIG.get("emd", {}).get("std_thr", 0.2))
+TS_EMD_ENERGY_RATIO_THR = float(TS_CONFIG.get("emd", {}).get("energy_ratio_thr", 0.2))
+TS_EMD_OUTPUT_PATH = BASE_DIR / TS_CONFIG.get("emd", {}).get("output_path", "artifacts/emd_processor.joblib")
+
+# Features & Output settings
+TS_FEATURES_OUTPUT_PATH = BASE_DIR / TS_CONFIG.get("features", {}).get("output_path", "artifacts/feature_extractor.joblib")
+TS_SUMMARY_PATH = BASE_DIR / TS_CONFIG.get("features", {}).get("summary_path", "reports/decomposition_summary.csv")
+
+# Visualization settings
+TS_PLOTS_DIR = BASE_DIR / TS_CONFIG.get("visualization", {}).get("plots_dir", "reports/important_plots/")
+TS_PLOTS_DPI = int(TS_CONFIG.get("visualization", {}).get("dpi", 150))
+
+# Ensure artifacts and visualization directories exist
+TS_DWT_OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+TS_PLOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+# =====================================================================
+# MODULE 2 REFINEMENT: FEATURE SELECTION & EVALUATION PARAMETERS
+# =====================================================================
+FS_CONFIG = config.get("feature_selection", {})
+FS_VARIANCE_THR = float(FS_CONFIG.get("variance_threshold", 0.01))
+FS_CORRELATION_THR = float(FS_CONFIG.get("correlation_threshold", 0.85))
+FS_IMPORTANCE_METHOD = FS_CONFIG.get("importance_method", "mutual_info")
+FS_TOP_K = int(FS_CONFIG.get("top_k_features", 20))
+FS_KEEP_COLS = FS_CONFIG.get("keep_columns", ["Date", "Project_ID", "Region", "Material_Type", "Quantity_Required"])
+
+FS_SELECTOR_PATH = BASE_DIR / FS_CONFIG.get("selector_output_path", "artifacts/feature_selector.joblib")
+FS_CORRELATION_PATH = BASE_DIR / FS_CONFIG.get("correlation_output_path", "artifacts/correlation_filter.joblib")
+FS_REPORT_PATH = BASE_DIR / FS_CONFIG.get("report_path", "reports/feature_selection_report.csv")
+FS_RECONSTRUCTION_REPORT_PATH = BASE_DIR / FS_CONFIG.get("reconstruction_report_path", "reports/reconstruction_report.csv")
+FS_QUALITY_REPORT_PATH = BASE_DIR / FS_CONFIG.get("quality_report_path", "reports/decomposition_quality_report.md")
+FS_CATALOG_PATH = BASE_DIR / FS_CONFIG.get("catalog_path", "reports/feature_catalog.md")
+
+# Ensure directories for outputs exist
+FS_SELECTOR_PATH.parent.mkdir(parents=True, exist_ok=True)
+FS_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+# =====================================================================
+# FORECASTING MODEL INFRASTRUCTURE PARAMETERS
+# =====================================================================
+FC_CONFIG = config.get("forecasting", {})
+RESULTS_CSV_PATH = BASE_DIR / FC_CONFIG.get("results_csv_path", "experiments/model_results.csv")
+DATASET_VERSION_PATH = BASE_DIR / FC_CONFIG.get("dataset_version_path", "reports/dataset_version.json")
+PIPELINE_VERSION_PATH = BASE_DIR / FC_CONFIG.get("pipeline_version_path", "reports/pipeline_version.md")
+EXPERIMENTS_DIR = BASE_DIR / FC_CONFIG.get("experiments_dir", "experiments/")
+FORECAST_RANDOM_SEED = int(FC_CONFIG.get("random_seed", 42))
+
+MODELS_CONFIG = config.get("models", {})
+
+# Ensure directories for forecasting results exist
+RESULTS_CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
+EXPERIMENTS_DIR.mkdir(parents=True, exist_ok=True)
+# Create experiment subfolders: results, plots, logs, checkpoints
+for folder in ["results", "plots", "logs", "checkpoints"]:
+    (EXPERIMENTS_DIR / folder).mkdir(parents=True, exist_ok=True)
+
+
+

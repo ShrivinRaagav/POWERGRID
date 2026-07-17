@@ -22,6 +22,19 @@ from src.utils.helpers import setup_logger
 from src.utils.reports_generator import (
     generate_data_quality_report, generate_data_dictionary, generate_pipeline_diagram
 )
+from src.time_series.decomposition import TimeSeriesFeatureExtractor
+from src.time_series.visualization import generate_important_plots
+from src.time_series.reconstruction_validator import run_reconstruction_validation
+from src.feature_selection.feature_selector import FeatureSelector
+from src.utils.catalog_generator import generate_feature_catalog
+from src.config.settings import (
+    FS_RECONSTRUCTION_REPORT_PATH, FS_QUALITY_REPORT_PATH, FS_CATALOG_PATH,
+    DATASET_VERSION_PATH, FORECAST_RANDOM_SEED
+)
+from src.utils.version_writer import generate_dataset_version_report
+
+
+
 
 logger = setup_logger("pipeline")
 
@@ -208,6 +221,68 @@ def run_pipeline(method: str = "ordinal") -> dict:
     processed_all = pd.concat([train_scaled, val_scaled, test_scaled], ignore_index=True)
     processed_all.to_csv(PROCESSED_DATASET_PATH, index=False)
     
+    # 10.5. Run Time-Series Decomposition & Feature Extraction (Module 2)
+    stage_start = time.perf_counter()
+    logger.info("Running Time-Series Decomposition & Feature Extraction (Module 2)...")
+    extractor = TimeSeriesFeatureExtractor()
+    processed_enriched, df_summary = extractor.fit_transform(processed_all)
+    
+    # Run Reconstruction Validation & Decomposition Quality report
+    run_reconstruction_validation(
+        df_ts=processed_enriched,
+        group_cols=extractor.group_cols,
+        date_col=extractor.date_col,
+        target_col=extractor.target_col,
+        dwt_transformer=extractor.dwt_transformer,
+        emd_processor=extractor.emd_processor,
+        csv_report_path=FS_RECONSTRUCTION_REPORT_PATH,
+        md_report_path=FS_QUALITY_REPORT_PATH
+    )
+    
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Time-Series Decomposition' completed in {duration:.4f}s.")
+    metrics["time_series_decomp"] = {"start": stage_start, "duration": duration}
+
+    # 10.6. Run Feature Selection & Dimensionality Reduction
+    stage_start = time.perf_counter()
+    logger.info("Running Feature Selection & Dimensionality Reduction...")
+    selector = FeatureSelector()
+    selector.fit(processed_enriched, target_col=extractor.target_col)
+    processed_selected = selector.transform(processed_enriched)
+    
+    # Overwrite combined processed dataset with final optimized selected columns
+    processed_selected.to_csv(PROCESSED_DATASET_PATH, index=False)
+    
+    # Generate dataset version report
+    generate_dataset_version_report(
+        df=processed_selected,
+        random_seed=FORECAST_RANDOM_SEED,
+        output_path=DATASET_VERSION_PATH
+    )
+    
+    # Generate dynamic feature catalog
+    generate_feature_catalog(
+        all_features=list(processed_enriched.columns),
+        selected_features=list(processed_selected.columns),
+        output_path=FS_CATALOG_PATH
+    )
+    
+    # Generate publication-quality important plots
+    generate_important_plots(
+        df_enriched=processed_enriched,
+        df_selected=processed_selected,
+        feature_selector=selector,
+        dwt_transformer=extractor.dwt_transformer,
+        emd_processor=extractor.emd_processor,
+        group_cols=extractor.group_cols,
+        date_col=extractor.date_col,
+        target_col=extractor.target_col
+    )
+    
+    duration = time.perf_counter() - stage_start
+    logger.info(f"Stage 'Feature Selection & Dimensionality Reduction' completed in {duration:.4f}s.")
+    metrics["feature_selection"] = {"start": stage_start, "duration": duration}
+    
     # 11. Generate Markdown Research Reports
     stage_start = time.perf_counter()
     logger.info("Generating markdown reports (Data Quality, Data Dictionary, Pipeline Diagram)...")
@@ -244,7 +319,7 @@ def run_pipeline(method: str = "ordinal") -> dict:
         "train_shape": train_scaled.shape,
         "val_shape": val_scaled.shape,
         "test_shape": test_scaled.shape,
-        "processed_all_shape": processed_all.shape,
+        "processed_all_shape": processed_selected.shape,
         "duration": pipeline_duration,
         "raw_anomalies": {
             "missing": raw_missing_count,

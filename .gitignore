@@ -11,3 +11,14 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Large binaries and serialized checkpoints
+*.joblib
+experiments/checkpoints/
+experiments/logs/
+experiments/results/
+experiments/plots/
+
+# Logs
+logs/
+*.log

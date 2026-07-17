@@ -67,3 +67,97 @@ future_model_placeholders:
       - "Reduce Delivery Time"
       - "Maximize Service Level"
       - "Minimize Inventory Instability"
+
+time_series:
+  group_by: ["Material_Type", "Region"]  # Grouped time series columns
+  date_col: "Date"
+  target_col: "Quantity_Required"
+  freq: "W-SUN"
+  fill_method: "zero"  # zero, ffill, or interpolate
+
+  dwt:
+    wavelet: "db4"
+    level: 3
+    output_path: "artifacts/dwt_transform.joblib"
+
+  emd:
+    spline_kind: "cubic"
+    max_imfs: 5
+    std_thr: 0.2
+    energy_ratio_thr: 0.2
+    output_path: "artifacts/emd_processor.joblib"
+
+  features:
+    output_path: "artifacts/feature_extractor.joblib"
+    summary_path: "reports/decomposition_summary.csv"
+
+  visualization:
+    plots_dir: "reports/important_plots/"
+    dpi: 150
+
+feature_selection:
+  variance_threshold: 0.01
+  correlation_threshold: 0.85
+  importance_method: "mutual_info"  # "mutual_info" or "random_forest"
+  top_k_features: 20
+  keep_columns:
+    - "Date"
+    - "Project_ID"
+    - "Region"
+    - "Material_Type"
+    - "Quantity_Required"
+  selector_output_path: "artifacts/feature_selector.joblib"
+  correlation_output_path: "artifacts/correlation_filter.joblib"
+  report_path: "reports/feature_selection_report.csv"
+  reconstruction_report_path: "reports/reconstruction_report.csv"
+  quality_report_path: "reports/decomposition_quality_report.md"
+  catalog_path: "reports/feature_catalog.md"
+
+forecasting:
+  results_csv_path: "experiments/model_results.csv"
+  dataset_version_path: "reports/dataset_version.json"
+  pipeline_version_path: "reports/pipeline_version.md"
+  experiments_dir: "experiments/"
+  random_seed: 42
+
+models:
+  mock_model:
+    constant_value: 0.0
+    random_noise_std: 0.1
+  random_forest:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 2
+    random_state: 42
+  xgboost:
+    n_estimators: 150
+    learning_rate: 0.05
+    max_depth: 5
+    subsample: 0.8
+    random_state: 42
+  lightgbm:
+    n_estimators: 200
+    learning_rate: 0.05
+    num_leaves: 31
+    random_state: 42
+  lstm:
+    epochs: 30
+    batch_size: 16
+    learning_rate: 0.001
+    lstm_units: 64
+    dense_units: 32
+  mlp:
+    hidden_layer_sizes: [100, 50]
+    max_iter: 500
+    random_state: 42
+  svr:
+    kernel: "rbf"
+    C: 10.0
+    epsilon: 0.1
+  prophet:
+    growth: "linear"
+    yearly_seasonality: "auto"
+    weekly_seasonality: "auto"
+
+
+
