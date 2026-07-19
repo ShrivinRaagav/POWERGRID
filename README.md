@@ -45,8 +45,8 @@ This module sets up a robust data pipeline that simulates these operational real
 
 ---
 
-## 4. Current Progress (55% Scope)
-This framework covers **Module 1 (Data Collection & Preprocessing)** and **Module 2 (Time-Series Analysis & Decomposition Refinement)**:
+## 4. Current Progress (75% Scope)
+This framework covers **Module 1 (Data Collection & Preprocessing)**, **Module 2 (Time-Series Analysis & Decomposition Refinement)**, and **Module 3 (Machine Learning Forecasting Models)**:
 *   **Operational Simulator**: Generates 6,000+ sequential records modeling monsoons, weather delays, emergencies, material shortages, and labor events.
 *   **Centralized Configuration**: All variables are managed via [config/config.yaml](file:///c:/Users/kavsh/Desktop/POWERGRID/config/config.yaml).
 *   **Feature Stabilization**: Implements mathematically stable and capped equations for `Demand_Growth` and `Inventory_Coverage`.
@@ -55,7 +55,8 @@ This framework covers **Module 1 (Data Collection & Preprocessing)** and **Modul
 *   **Empirical Mode Decomposition (EMD)**: Resolves non-stationary patterns into Intrinsic Mode Functions (IMFs) and residual trends.
 *   **Reconstruction Validation**: Computes DWT and EMD signal reconstruction RMSE, MAE, and correlation per group to ensure zero-loss representation.
 *   **Feature Selection & Dimensionality Reduction**: Automatically removes duplicate, constant, low-variance, and highly correlated features (keeping the one with higher Mutual Information importance). Compiles [reports/feature_selection_report.csv](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/feature_selection_report.csv), reducing dataset columns from ~85 to 24.
-*   **Model Evaluation Framework**: Provides reusable point and interval forecast evaluation utilities (MAE, RMSE, MAPE, R², SMAPE, and Pinball Loss) and comparison/plotting registries for forecasting in Module 3.
+*   **Model Evaluation Framework**: Provides reusable point and interval forecast evaluation utilities (MAE, RMSE, MAPE, R², SMAPE, and Pinball Loss) and comparison/plotting registries.
+*   **Machine Learning Forecasting Models**: Integrates six registered models (Random Forest, SVR, XGBoost with validation early stopping, MLP, LSTM, and LightGBM Quantile Regression) into the CLI training controller. Automatically serializes training checkpoints, logs run parameters, and outputs comparison reports (`best_model.json`, `model_performance.csv`, `model_summary.md`).
 
 ## 5. Completed Modules
 *   **Configuration Manager**: [settings.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/config/settings.py) dynamically reads environment constraints from YAML.
