@@ -156,11 +156,19 @@ def update_reports():
     # Keep only the latest run for each unique model
     latest_df = df.groupby("Model Name").last().reset_index()
     
+    # Filter only production models, exclude mock/test models
+    production_models = ["random_forest", "svr", "xgboost", "mlp", "lstm", "lightgbm_quantile"]
+    latest_df = latest_df[latest_df["Model Name"].isin(production_models)]
+    if latest_df.empty:
+        logger.warning("No production model runs found in results. Skipping reports update.")
+        return
+        
     report_df = pd.DataFrame()
     report_df["Model"] = latest_df["Model Name"]
     report_df["MAE"] = pd.to_numeric(latest_df["MAE"], errors="coerce")
     report_df["RMSE"] = pd.to_numeric(latest_df["RMSE"], errors="coerce")
     report_df["MAPE"] = pd.to_numeric(latest_df["MAPE"], errors="coerce")
+    report_df["WMAPE"] = pd.to_numeric(latest_df["WMAPE"] if "WMAPE" in latest_df.columns else pd.Series([np.nan]*len(latest_df)), errors="coerce")
     report_df["SMAPE"] = pd.to_numeric(latest_df["SMAPE"], errors="coerce")
     report_df["R²"] = pd.to_numeric(latest_df["R2"], errors="coerce")
     report_df["Training Time"] = pd.to_numeric(latest_df["Training Time"], errors="coerce")
@@ -191,25 +199,29 @@ def update_reports():
             
     report_df["Pinball Loss"] = pinball_col
     
+    # Sort the comparison table by RMSE in ascending order (best performing model first)
+    report_df = report_df.sort_values(by="RMSE", ascending=True).reset_index(drop=True)
+    
     # Save reports
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
     
-    report_df.to_csv(reports_dir / "model_performance.csv", index=False)
-    report_df.to_csv(reports_dir / "model_comparison_table.csv", index=False)
+    # Export with WMAPE formatted as a percentage string
+    export_df = report_df.copy()
+    export_df["WMAPE"] = export_df["WMAPE"].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) else "N/A")
     
-    # Select best model (excluding mock models and test logs)
-    valid_models = report_df[~report_df["Model"].str.contains("mock|test", case=False, na=True)]
-    if valid_models.empty:
-        valid_models = report_df
-        
-    best_row = valid_models.sort_values(by="RMSE", ascending=True).iloc[0]
+    export_df.to_csv(reports_dir / "model_performance.csv", index=False)
+    export_df.to_csv(reports_dir / "model_comparison_table.csv", index=False)
+    
+    # Select best model (sorted first row)
+    best_row = report_df.iloc[0]
     best_model_name = best_row["Model"]
     
     best_metrics = {
         "MAE": float(best_row["MAE"]) if pd.notnull(best_row["MAE"]) else None,
         "RMSE": float(best_row["RMSE"]) if pd.notnull(best_row["RMSE"]) else None,
         "MAPE": float(best_row["MAPE"]) if pd.notnull(best_row["MAPE"]) else None,
+        "WMAPE": f"{float(best_row['WMAPE']):.2f}%" if pd.notnull(best_row["WMAPE"]) else None,
         "SMAPE": float(best_row["SMAPE"]) if pd.notnull(best_row["SMAPE"]) else None,
         "R2": float(best_row["R²"]) if pd.notnull(best_row["R²"]) else None,
         "PinballLoss": best_row["Pinball Loss"] if best_row["Pinball Loss"] != "N/A" else None
@@ -228,33 +240,62 @@ def update_reports():
     # Generate model_summary.md
     summary_md = f"""# POWERGRID Demand Forecasting - Model Summary Report
 
-This report summarizes the comparative performance of all implemented forecasting models. All metrics are computed on the held-out chronological test dataset.
+This report summarizes the comparative performance of all implemented production forecasting models. All metrics are computed on the held-out chronological test dataset.
 
 ## Model Comparison
 
-| Model | MAE | RMSE | MAPE (%) | SMAPE (%) | R² | Training Time (s) | Inference Time (s) | Pinball Loss |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Model | MAE | RMSE | MAPE (%) | WMAPE (%) | SMAPE (%) | R² | Training Time (s) | Inference Time (s) | Pinball Loss |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 """
     for _, row in report_df.iterrows():
         mae_val = f"{row['MAE']:.6f}" if pd.notnull(row['MAE']) else "N/A"
         rmse_val = f"{row['RMSE']:.6f}" if pd.notnull(row['RMSE']) else "N/A"
-        mape_val = f"{row['MAPE']:.4f}" if pd.notnull(row['MAPE']) else "N/A"
-        smape_val = f"{row['SMAPE']:.4f}" if pd.notnull(row['SMAPE']) else "N/A"
+        mape_val = f"{row['MAPE']:.4f}%" if pd.notnull(row['MAPE']) else "N/A"
+        wmape_val = f"{row['WMAPE']:.2f}%" if pd.notnull(row['WMAPE']) else "N/A"
+        smape_val = f"{row['SMAPE']:.4f}%" if pd.notnull(row['SMAPE']) else "N/A"
         r2_val = f"{row['R²']:.6f}" if pd.notnull(row['R²']) else "N/A"
         t_time = f"{row['Training Time']:.4f}" if pd.notnull(row['Training Time']) else "N/A"
         i_time = f"{row['Inference Time']:.4f}" if pd.notnull(row['Inference Time']) else "N/A"
         pin_val = str(row["Pinball Loss"])
         
-        summary_md += f"| {row['Model']} | {mae_val} | {rmse_val} | {mape_val} | {smape_val} | {r2_val} | {t_time} | {i_time} | {pin_val} |\n"
+        summary_md += f"| {row['Model']} | {mae_val} | {rmse_val} | {mape_val} | {wmape_val} | {smape_val} | {r2_val} | {t_time} | {i_time} | {pin_val} |\n"
         
     summary_md += f"""
 ---
 
-## Selection Results
-- **Selected Best Model**: `{best_model_name}`
-- **Selection Criterion**: Lowest RMSE on held-out chronological test set
-- **RMSE Score**: {best_metrics['RMSE']:.6f}
-- **Metadata Logged to**: [best_model.json](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/best_model.json)
+## Best Performing Model
+
+Model:
+{best_model_name}
+
+Selection Criterion:
+Lowest RMSE on the held-out chronological test dataset.
+
+Performance Summary:
+- RMSE: {best_row['RMSE']:.6f}
+- MAE: {best_row['MAE']:.6f}
+- WMAPE: {best_row['WMAPE']:.2f}%
+- R²: {best_row['R²']:.6f}
+
+Future Usage:
+This model will be forwarded to:
+- Module 3.5 (Forecast Model Evaluation)
+- Module 4 (SHAP Explainability)
+- Module 5 (Multi-Objective Supply Chain Optimization)
+
+---
+
+## Metric Documentation
+
+- **MAE**: Average absolute prediction error.
+- **RMSE**: Penalizes larger prediction errors more heavily.
+- **MAPE**: Average percentage prediction error. Computed using a numerically stable implementation that ignores zero or near-zero targets.
+- **WMAPE**: Weighted Mean Absolute Percentage Error. Recommended for demand forecasting because it remains stable even when demand contains small values.
+- **SMAPE**: Symmetric percentage error between actual and predicted values.
+- **R²**: Coefficient of determination measuring explained variance.
+- **Pinball Loss**: Measures the quality of probabilistic (quantile) predictions and is only applicable to LightGBM Quantile Regression.
+
+---
 
 > [!NOTE]
 > All evaluation metrics reported above are computed on the independent chronological test dataset to ensure an unbiased comparison.

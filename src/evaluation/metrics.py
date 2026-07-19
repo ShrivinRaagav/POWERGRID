@@ -24,15 +24,28 @@ def calculate_rmse(y_true: Any, y_pred: Any) -> float:
     y_t, y_p = to_numpy_arrays(y_true, y_pred)
     return float(np.sqrt(mean_squared_error(y_t, y_p)))
 
-def calculate_mape(y_true: Any, y_pred: Any, epsilon: float = 1e-5) -> float:
+def calculate_mape(y_true: Any, y_pred: Any, threshold: float = 1e-5) -> float:
     """
     Calculates Mean Absolute Percentage Error.
-    Uses epsilon in denominator to avoid division by zero.
+    Ignores samples where the true target is zero or below a small threshold.
     """
     y_t, y_p = to_numpy_arrays(y_true, y_pred)
-    # Avoid zero values in true target using epsilon
-    denom = np.where(np.abs(y_t) < epsilon, epsilon, y_t)
-    return float(np.mean(np.abs((y_t - y_p) / denom)) * 100.0)
+    valid_mask = np.abs(y_t) >= threshold
+    if not np.any(valid_mask):
+        return 0.0
+    return float(np.mean(np.abs((y_t[valid_mask] - y_p[valid_mask]) / y_t[valid_mask])) * 100.0)
+
+def calculate_wmape(y_true: Any, y_pred: Any) -> float:
+    """
+    Calculates Weighted Mean Absolute Percentage Error (WMAPE).
+    Formula: sum(|y_true - y_pred|) / sum(|y_true|)
+    Returns ratio (e.g. 0.1462). Returns 0.0 if sum of actuals is zero.
+    """
+    y_t, y_p = to_numpy_arrays(y_true, y_pred)
+    sum_actual = np.sum(np.abs(y_t))
+    if sum_actual < 1e-8:
+        return 0.0
+    return float(np.sum(np.abs(y_t - y_p)) / sum_actual)
 
 def calculate_r2(y_true: Any, y_pred: Any) -> float:
     """Calculates R² Coefficient of Determination."""
@@ -70,7 +83,7 @@ def evaluate_all_metrics(
     quantile_preds: Optional[Dict[float, Any]] = None
 ) -> Dict[str, float]:
     """
-    Computes all standard forecast metrics (MAE, RMSE, MAPE, R2, SMAPE) 
+    Computes all standard forecast metrics (MAE, RMSE, MAPE, WMAPE, R2, SMAPE) 
     and optional Pinball Losses if quantile predictions are supplied.
     
     Parameters:
@@ -85,6 +98,7 @@ def evaluate_all_metrics(
         "MAE": calculate_mae(y_true, y_pred),
         "RMSE": calculate_rmse(y_true, y_pred),
         "MAPE": calculate_mape(y_true, y_pred),
+        "WMAPE": calculate_wmape(y_true, y_pred) * 100.0,  # Reported as percentage
         "R2": calculate_r2(y_true, y_pred),
         "SMAPE": calculate_smape(y_true, y_pred)
     }

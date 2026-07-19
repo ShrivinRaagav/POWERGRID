@@ -76,6 +76,7 @@ def log_experiment_run(
         "MAE": f"{metrics.get('MAE', np.nan):.6f}" if 'MAE' in metrics else "N/A",
         "RMSE": f"{metrics.get('RMSE', np.nan):.6f}" if 'RMSE' in metrics else "N/A",
         "MAPE": f"{metrics.get('MAPE', np.nan):.6f}" if 'MAPE' in metrics else "N/A",
+        "WMAPE": f"{metrics.get('WMAPE', np.nan):.6f}" if 'WMAPE' in metrics else "N/A",
         "SMAPE": f"{metrics.get('SMAPE', np.nan):.6f}" if 'SMAPE' in metrics else "N/A",
         "R2": f"{metrics.get('R2', np.nan):.6f}" if 'R2' in metrics else "N/A",
         "Pinball Loss": pinball_str,
@@ -90,6 +91,27 @@ def log_experiment_run(
     headers = list(row.keys())
     file_exists = csv_path.exists()
     
+    if file_exists:
+        try:
+            with open(csv_path, "r", newline="", encoding="utf-8") as f:
+                reader = csv.reader(f)
+                existing_headers = next(reader, [])
+            if "WMAPE" not in existing_headers:
+                logger.info("Migrating experiment results CSV to include WMAPE header column.")
+                with open(csv_path, "r", newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    rows = list(reader)
+                with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                    writer = csv.DictWriter(f, fieldnames=headers)
+                    writer.writeheader()
+                    for r in rows:
+                        if "WMAPE" not in r:
+                            r["WMAPE"] = "N/A"
+                        filtered_r = {k: v for k, v in r.items() if k in headers}
+                        writer.writerow(filtered_r)
+        except Exception as e:
+            logger.error(f"Failed to migrate experiment results CSV: {e}")
+            
     try:
         # Write to results file
         with open(csv_path, "a", newline="", encoding="utf-8") as f:

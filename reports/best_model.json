@@ -4,10 +4,11 @@
     "evaluation_metrics": {
         "MAE": 150.320743,
         "RMSE": 218.515741,
-        "MAPE": 50324836.64537,
+        "MAPE": 30.674077,
+        "WMAPE": "27.68%",
         "SMAPE": 42.823926,
         "R2": 0.709838,
         "PinballLoss": null
     },
-    "generated_at": "2026-07-19T20:35:03.338343"
+    "generated_at": "2026-07-19T23:18:28.064831"
 }
