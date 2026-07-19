@@ -10,21 +10,23 @@ The project architecture is inspired by the research paper: **"A Machine Learnin
 1. [Project Overview](#1-project-overview)
 2. [Research Motivation](#2-research-motivation)
 3. [POWERGRID Problem Statement](#3-powergrid-problem-statement)
-4. [Current Progress (55% Scope)](#4-current-progress-55-scope)
+4. [Current Progress (75% Scope)](#4-current-progress-75-scope)
 5. [Completed Modules](#5-completed-modules)
 6. [Architecture Diagram](#6-architecture-diagram)
 7. [Pipeline Diagram](#7-pipeline-diagram)
 8. [Folder Structure](#8-folder-structure)
 9. [Execution Instructions](#9-execution-instructions)
 10. [Generated Reports and Artifacts](#10-generated-reports-and-artifacts)
-11. [Future Work](#11-future-work)
+11. [Module 3: Machine Learning Forecasting Models](#12-module-3-machine-learning-forecasting-models)
+12. [Future Work](#11-future-work)
 
 ---
 
 ## 1. Project Overview
-Transmission grid infrastructure projects (conductors, insulators, towers, transformers, etc.) require precise procurement schedules to prevent project cost overruns and delays. This framework implements **Module 1 (Data Collection, Cleaning, Preprocessing, Validation, and Feature Engineering)**. 
-
-It simulates a highly realistic operational grid environment, validates data quality using a custom verification suite, performs modular data cleaning, engineers cyclical and time-lagged parameters, and normalizes inputs—laying the foundation for future decomposition and multi-objective optimization solvers.
+Transmission grid infrastructure projects (conductors, insulators, towers, transformers, etc.) require precise procurement schedules to prevent project cost overruns and delays. This framework implements:
+- **Module 1 (Data Collection, Preprocessing & Feature Engineering)**: Simulates operational realities, cleans entries, normalizes values, and engineers lag variables.
+- **Module 2 (Time-Series Decomposition)**: Decomposes demand signals using Discrete Wavelet Transform (DWT) and Empirical Mode Decomposition (EMD), validating signal reconstruction.
+- **Module 3 (Machine Learning Forecasting Models)**: Registers and trains six point and interval forecasting algorithms to predict grid material demand.
 
 ---
 
@@ -73,9 +75,10 @@ This framework covers **Module 1 (Data Collection & Preprocessing)**, **Module 2
 *   **Evaluation Framework**: `src/evaluation/` ([metrics.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/evaluation/metrics.py), [comparison.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/evaluation/comparison.py), [visualization.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/evaluation/visualization.py)) implements reusable forecast scoring metrics and charts.
 *   **Forecasting Abstract Model Interface**: [base_model.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/base_model.py) defines the standard interface for ML models.
 *   **Model Registry**: [registry.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/registry.py) dynamically tracks and accesses registered forecasting models.
+*   **Forecasting Model Implementations**: Registers RandomForest, SVR, XGBoost, MLP, LSTM, and LightGBM Quantile wrappers in `src/models/` ([random_forest.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/random_forest.py), [svr.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/svr.py), [xgboost_model.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/xgboost_model.py), [mlp.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/mlp.py), [lstm.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/lstm.py), [lightgbm_quantile.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/lightgbm_quantile.py)).
 *   **Experiment Manager**: [experiment_manager.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/experiments/experiment_manager.py) structures output subdirectories.
 *   **Experiment Logger**: [experiment_logger.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/experiments/experiment_logger.py) appends run metrics to central CSV tables.
-*   **Training CLI Controller**: [train.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/train.py) manages training, prediction, evaluation, and logging pipelines.
+*   **Training CLI Controller**: [train.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/models/train.py) manages training, prediction, evaluation, reports writing, and logging pipelines.
 *   **Visualization Engine**: [visualization.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/time_series/visualization.py) plots signal components, heatmaps, importances, and saves them as PNG.
 *   **Orchestrator Pipeline**: [pipeline.py](file:///c:/Users/kavsh/Desktop/POWERGRID/src/pipeline.py) manages the sequence.
 
@@ -182,7 +185,7 @@ python -m unittest discover -s tests -p "test_*.py"
 ---
 
 ## 10. Generated Reports and Artifacts
-Executing the pipeline dynamically updates:
+Executing the pipeline and training controller dynamically updates:
 *   [reports/data_quality_report.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/data_quality_report.md): Validates raw vs cleaned values, nulls, duplicates, and outlier caps.
 *   [reports/data_dictionary.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/data_dictionary.md): Describes raw fields in detail.
 *   [reports/feature_catalog.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/feature_catalog.md): Describes all 78+ generated columns, origins, formulas, and active forecasting status.
@@ -192,15 +195,20 @@ Executing the pipeline dynamically updates:
 *   [reports/important_plots/](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/important_plots/): Representative decomposition plots, correlation heatmaps, and feature importances.
 *   [reports/dataset_version.json](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/dataset_version.json): Stores active version hash, sample counts, and feature arrays.
 *   [reports/pipeline_version.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/pipeline_version.md): Documents the modules sequence, directory layout, and release history.
-*   [experiments/model_results.csv](file:///c:/Users/kavsh/Desktop/POWERGRID/experiments/model_results.csv): central CSV recording timestamped run metrics (MAE, RMSE, SMAPE, etc.) and git revisions.
-*   [artifacts/](file:///c:/Users/kavsh/Desktop/POWERGRID/artifacts/): Serialized DWT, EMD, and feature selector joblib objects.
+*   [reports/model_performance.csv](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/model_performance.csv): Comparative summary of forecasting model test metrics.
+*   [reports/model_comparison_table.csv](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/model_comparison_table.csv): Duplicate of model performance table for external analysis.
+*   [reports/model_summary.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/model_summary.md): Markdown comparison report of forecasting models.
+*   [reports/best_model.json](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/best_model.json): Selection details and scores of the best performing model.
+*   [experiments/model_results.csv](file:///c:/Users/kavsh/Desktop/POWERGRID/experiments/model_results.csv): Central CSV recording timestamped execution runs, hyperparams, and test metrics.
+*   [artifacts/](file:///c:/Users/kavsh/Desktop/POWERGRID/artifacts/): Serialized DWT, EMD, feature selector, and forecasting model files (`artifacts/models/`).
 
 ---
 
 ## 11. Future Work
-The completed modules lay a robust foundation for the final steps:
-1.  **ML Forecasting**: Register and train forecasting algorithms (`random_forest`, `xgboost`, `lightgbm`, `lstm`, `mlp`, `svr`, `prophet`) using the CLI controller `src/models/train.py`, evaluating point and interval predictions using the `src/evaluation/` metrics.
-2.  **Multi-Objective LP Solver**: Supply predicted demands, risk profiles, and costs into a `PuLP`/`CBC` linear programming solver to optimize multi-period procurement and routing under capacity and budget constraints.
+The completed modules lay a robust foundation for the final phases:
+1.  **Module 3.5 – Forecast Model Evaluation**: Implement statistical hypothesis testing (e.g. Wilcoxon Signed-Rank Test) to confirm significant performance differences between forecasting models.
+2.  **Module 4 – SHAP Explainability**: Perform SHAP attribution analysis on the best forecasting model to analyze input feature importances.
+3.  **Module 5 – Multi-Objective Supply Chain Optimization Solver**: Supply predicted material demands, risk indices, and procurement/logistics costs into a `PuLP`/`CBC` linear programming solver to generate optimized multi-period procurement schedules under capacity, lead-time, and budget limits.
 
 ---
 
