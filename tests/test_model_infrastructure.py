@@ -124,5 +124,156 @@ class TestExperimentTracking(unittest.TestCase):
         git_commit = get_git_commit()
         self.assertEqual(df.iloc[0]["Git Commit"], git_commit)
 
+class TestModule3Models(unittest.TestCase):
+    def setUp(self):
+        # Create a tiny dummy regression dataset
+        np.random.seed(42)
+        self.num_samples = 50
+        self.num_features = 10
+        self.feature_cols = [f"Feature_{i}" for i in range(self.num_features)]
+        
+        self.X_train = pd.DataFrame(np.random.rand(self.num_samples, self.num_features), columns=self.feature_cols)
+        self.y_train = pd.Series(np.random.rand(self.num_samples) * 100.0)
+        
+        self.X_val = pd.DataFrame(np.random.rand(10, self.num_features), columns=self.feature_cols)
+        self.y_val = pd.Series(np.random.rand(10) * 100.0)
+        
+        self.X_test = pd.DataFrame(np.random.rand(10, self.num_features), columns=self.feature_cols)
+        self.y_test = pd.Series(np.random.rand(10) * 100.0)
+        
+        self.temp_dir = tempfile.mkdtemp()
+        
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+        
+    def test_random_forest(self):
+        from src.models.random_forest import RandomForestForecastModel
+        model = RandomForestForecastModel(n_estimators=5, max_depth=3)
+        model.train(self.X_train, self.y_train)
+        self.assertTrue(model.is_fitted)
+        self.assertIsNotNone(model.feature_importances_)
+        
+        preds = model.predict(self.X_test)
+        self.assertEqual(len(preds), len(self.X_test))
+        
+        # Test evaluate
+        metrics = model.evaluate(self.X_test, self.y_test)
+        self.assertIn("MAE", metrics)
+        
+        # Test save and load
+        path = os.path.join(self.temp_dir, "rf.joblib")
+        model.save(path)
+        
+        loaded = RandomForestForecastModel()
+        loaded.load(path)
+        self.assertTrue(loaded.is_fitted)
+        loaded_preds = loaded.predict(self.X_test)
+        np.testing.assert_array_almost_equal(preds, loaded_preds)
+
+    def test_svr(self):
+        from src.models.svr import SVRForecastModel
+        model = SVRForecastModel(kernel="rbf", C=1.0)
+        model.train(self.X_train, self.y_train)
+        self.assertTrue(model.is_fitted)
+        
+        preds = model.predict(self.X_test)
+        self.assertEqual(len(preds), len(self.X_test))
+        
+        path = os.path.join(self.temp_dir, "svr.joblib")
+        model.save(path)
+        
+        loaded = SVRForecastModel()
+        loaded.load(path)
+        self.assertTrue(loaded.is_fitted)
+        loaded_preds = loaded.predict(self.X_test)
+        np.testing.assert_array_almost_equal(preds, loaded_preds)
+
+    def test_xgboost(self):
+        from src.models.xgboost_model import XGBoostForecastModel
+        model = XGBoostForecastModel(n_estimators=5, early_stopping_rounds=2)
+        model.train(self.X_train, self.y_train, X_val=self.X_val, y_val=self.y_val)
+        self.assertTrue(model.is_fitted)
+        
+        preds = model.predict(self.X_test)
+        self.assertEqual(len(preds), len(self.X_test))
+        
+        path = os.path.join(self.temp_dir, "xgb.joblib")
+        model.save(path)
+        
+        loaded = XGBoostForecastModel()
+        loaded.load(path)
+        self.assertTrue(loaded.is_fitted)
+        loaded_preds = loaded.predict(self.X_test)
+        np.testing.assert_array_almost_equal(preds, loaded_preds)
+
+    def test_mlp(self):
+        from src.models.mlp import MLPForecastModel
+        model = MLPForecastModel(hidden_layer_sizes=[10, 5], max_iter=10, batch_size=4)
+        model.train(self.X_train, self.y_train)
+        self.assertTrue(model.is_fitted)
+        
+        preds = model.predict(self.X_test)
+        self.assertEqual(len(preds), len(self.X_test))
+        
+        path = os.path.join(self.temp_dir, "mlp.joblib")
+        model.save(path)
+        
+        loaded = MLPForecastModel()
+        loaded.load(path)
+        self.assertTrue(loaded.is_fitted)
+        loaded_preds = loaded.predict(self.X_test)
+        np.testing.assert_array_almost_equal(preds, loaded_preds)
+
+    def test_lstm(self):
+        from src.models.lstm import LSTMForecastModel
+        model = LSTMForecastModel(window_size=3, lstm_units=8, epochs=2, batch_size=4)
+        model.train(self.X_train, self.y_train, X_val=self.X_val, y_val=self.y_val)
+        self.assertTrue(model.is_fitted)
+        
+        preds = model.predict(self.X_test)
+        self.assertEqual(len(preds), len(self.X_test))
+        
+        path = os.path.join(self.temp_dir, "lstm.joblib")
+        model.save(path)
+        
+        loaded = LSTMForecastModel()
+        loaded.load(path)
+        self.assertTrue(loaded.is_fitted)
+        loaded_preds = loaded.predict(self.X_test)
+        np.testing.assert_array_almost_equal(preds, loaded_preds)
+
+    def test_lightgbm_quantile(self):
+        from src.models.lightgbm_quantile import LightGBMQuantileForecastModel
+        model = LightGBMQuantileForecastModel(n_estimators=5)
+        model.train(self.X_train, self.y_train)
+        self.assertTrue(model.is_fitted)
+        
+        preds = model.predict(self.X_test)
+        self.assertIsInstance(preds, dict)
+        self.assertIn("P10", preds)
+        self.assertIn("P50", preds)
+        self.assertIn("P90", preds)
+        self.assertEqual(len(preds["P10"]), len(self.X_test))
+        self.assertEqual(len(preds["P50"]), len(self.X_test))
+        self.assertEqual(len(preds["P90"]), len(self.X_test))
+        
+        # Test evaluate calculates pinball loss
+        metrics = model.evaluate(self.X_test, self.y_test)
+        self.assertIn("Pinball_Loss_0.10", metrics)
+        self.assertIn("Pinball_Loss_0.50", metrics)
+        self.assertIn("Pinball_Loss_0.90", metrics)
+        self.assertIn("Pinball_Loss_Average", metrics)
+        
+        path = os.path.join(self.temp_dir, "lgb.joblib")
+        model.save(path)
+        
+        loaded = LightGBMQuantileForecastModel()
+        loaded.load(path)
+        self.assertTrue(loaded.is_fitted)
+        loaded_preds = loaded.predict(self.X_test)
+        np.testing.assert_array_almost_equal(preds["P10"], loaded_preds["P10"])
+        np.testing.assert_array_almost_equal(preds["P50"], loaded_preds["P50"])
+        np.testing.assert_array_almost_equal(preds["P90"], loaded_preds["P90"])
+
 if __name__ == "__main__":
     unittest.main()

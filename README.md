@@ -200,3 +200,45 @@ Executing the pipeline dynamically updates:
 The completed modules lay a robust foundation for the final steps:
 1.  **ML Forecasting**: Register and train forecasting algorithms (`random_forest`, `xgboost`, `lightgbm`, `lstm`, `mlp`, `svr`, `prophet`) using the CLI controller `src/models/train.py`, evaluating point and interval predictions using the `src/evaluation/` metrics.
 2.  **Multi-Objective LP Solver**: Supply predicted demands, risk profiles, and costs into a `PuLP`/`CBC` linear programming solver to optimize multi-period procurement and routing under capacity and budget constraints.
+
+---
+
+## 12. Module 3: Machine Learning Forecasting Models
+
+### Supported Forecasting Models
+Module 3 implements and registers six production-quality forecasting models:
+1. **Random Forest Regressor** (`random_forest`): Configurable bagging ensemble using scikit-learn. Stores feature importances.
+2. **Support Vector Regressor** (`svr`): Support Vector Regression using scikit-learn. Supports linear and RBF kernels.
+3. **XGBoost Regressor** (`xgboost`): Gradient boosted trees using xgboost. Supports early stopping based on the Validation Set and automatically restores the best validation iteration checkpoint.
+4. **Multi-Layer Perceptron** (`mlp`): Fully-connected feedforward neural network using scikit-learn.
+5. **Long Short-Term Memory** (`lstm`): Deep learning sequence forecasting model using TensorFlow/Keras. Architecture: `Input` $\rightarrow$ `LSTM` $\rightarrow$ `Dropout` $\rightarrow$ `Dense(1)`. Automatically prepares sequence windows from the dataset and prepends the history buffer during inference to ensure matching dimensions.
+6. **LightGBM Quantile Regression** (`lightgbm_quantile`): Non-parametric probabilistic forecasting model training three independent quantile regressors for P10, P50, and P90. Evaluated using Pinball Loss to measure conditional quantile prediction accuracy.
+
+### Training CLI Commands
+To execute training, prediction, evaluation, and logging for any model:
+```bash
+python -m src.models.train --model random_forest
+python -m src.models.train --model svr
+python -m src.models.train --model xgboost
+python -m src.models.train --model mlp
+python -m src.models.train --model lstm
+python -m src.models.train --model lightgbm_quantile
+```
+
+### Generated Artifacts & Model Storage
+Model serialization outputs are saved to the persistent `artifacts/models/` folder:
+- `artifacts/models/random_forest.joblib`
+- `artifacts/models/svr.joblib`
+- `artifacts/models/xgboost.joblib`
+- `artifacts/models/mlp.joblib`
+- `artifacts/models/lstm.keras` (with companion `.keras.meta` metadata file)
+- `artifacts/models/lightgbm_q10.joblib`
+- `artifacts/models/lightgbm_q50.joblib`
+- `artifacts/models/lightgbm_q90.joblib`
+
+### Output Reports & Comparison Logs
+Each training flow automatically updates model comparisons:
+- `reports/model_performance.csv`: Tabulates comparative model metrics (MAE, RMSE, MAPE, SMAPE, R², Training/Inference times, and Pinball Loss).
+- `reports/model_comparison_table.csv`: Duplicate comparison CSV for easy ingestion by external visualization systems.
+- `reports/best_model.json`: Selection metadata indicating the best-performing model based on the lowest RMSE on the held-out chronological test set.
+- `reports/model_summary.md`: Detailed markdown summary displaying comparison metrics tables and selection rankings.

@@ -134,9 +134,11 @@ models:
     learning_rate: 0.05
     max_depth: 5
     subsample: 0.8
+    colsample_bytree: 0.8
+    early_stopping_rounds: 10
     random_state: 42
-  lightgbm:
-    n_estimators: 200
+  lightgbm_quantile:
+    n_estimators: 100
     learning_rate: 0.05
     num_leaves: 31
     random_state: 42
@@ -146,14 +148,21 @@ models:
     learning_rate: 0.001
     lstm_units: 64
     dense_units: 32
+    window_size: 4
+    dropout: 0.2
   mlp:
     hidden_layer_sizes: [100, 50]
+    activation: "relu"
+    learning_rate: "constant"
+    learning_rate_init: 0.001
     max_iter: 500
+    batch_size: 32
     random_state: 42
   svr:
     kernel: "rbf"
     C: 10.0
     epsilon: 0.1
+    gamma: "scale"
   prophet:
     growth: "linear"
     yearly_seasonality: "auto"

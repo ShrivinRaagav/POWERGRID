@@ -8,8 +8,14 @@ from src.config.settings import (
     PROCESSED_DATASET_PATH, MODELS_CONFIG, FORECAST_RANDOM_SEED, DATE_COL, TARGET_COL
 )
 from src.models.registry import get_model_class, list_registered_models
-# Import mock_model so it registers itself automatically
+# Import mock_model and other models so they register automatically
 import src.models.mock_model
+import src.models.random_forest
+import src.models.svr
+import src.models.xgboost_model
+import src.models.mlp
+import src.models.lstm
+import src.models.lightgbm_quantile
 from src.experiments.experiment_manager import ExperimentManager
 from src.experiments.experiment_logger import log_experiment_run
 from src.utils.helpers import setup_logger
@@ -99,7 +105,12 @@ def run_training_flow(model_name: str, notes: str = ""):
     
     # Save predictions alongside actuals
     df_preds = test_df[id_cols + [TARGET_COL]].copy()
-    df_preds["Forecast_Prediction"] = preds
+    if isinstance(preds, dict):
+        df_preds["Forecast_Prediction_P10"] = preds["P10"]
+        df_preds["Forecast_Prediction"] = preds["P50"]
+        df_preds["Forecast_Prediction_P90"] = preds["P90"]
+    else:
+        df_preds["Forecast_Prediction"] = preds
     manager.save_predictions(df_preds, filename="predictions.csv")
     
     # 11. Log results to the central CSV file
@@ -113,6 +124,145 @@ def run_training_flow(model_name: str, notes: str = ""):
     )
     
     logger.info(f"Forecasting pipeline completed successfully for run: {manager.run_id}")
+    
+    # 12. Automatically update reports
+    update_reports()
+
+def update_reports():
+    """Compiles results from all runs to generate performance reports and best model selection metadata."""
+    import json
+    from datetime import datetime
+    import src.config.settings as settings
+    
+    results_path = Path(settings.RESULTS_CSV_PATH)
+    if not results_path.exists():
+        logger.warning(f"Results CSV not found at {results_path}. Skipping reports update.")
+        return
+        
+    try:
+        df = pd.read_csv(results_path)
+    except Exception as e:
+        logger.error(f"Failed to read results CSV: {e}")
+        return
+        
+    if df.empty:
+        logger.warning("Results CSV is empty. Skipping reports update.")
+        return
+        
+    # Convert Timestamp to datetime to find the latest runs
+    df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+    df = df.sort_values(by="Timestamp")
+    
+    # Keep only the latest run for each unique model
+    latest_df = df.groupby("Model Name").last().reset_index()
+    
+    report_df = pd.DataFrame()
+    report_df["Model"] = latest_df["Model Name"]
+    report_df["MAE"] = pd.to_numeric(latest_df["MAE"], errors="coerce")
+    report_df["RMSE"] = pd.to_numeric(latest_df["RMSE"], errors="coerce")
+    report_df["MAPE"] = pd.to_numeric(latest_df["MAPE"], errors="coerce")
+    report_df["SMAPE"] = pd.to_numeric(latest_df["SMAPE"], errors="coerce")
+    report_df["R²"] = pd.to_numeric(latest_df["R2"], errors="coerce")
+    report_df["Training Time"] = pd.to_numeric(latest_df["Training Time"], errors="coerce")
+    report_df["Inference Time"] = pd.to_numeric(latest_df["Inference Time"], errors="coerce")
+    
+    # Extract Pinball Loss for LightGBM Quantile Regression
+    pinball_col = []
+    for _, row in latest_df.iterrows():
+        if row["Model Name"] == "lightgbm_quantile":
+            loss_str = row.get("Pinball Loss", "N/A")
+            if pd.notnull(loss_str) and loss_str != "N/A" and loss_str != "":
+                try:
+                    losses = json.loads(loss_str)
+                    val_10 = losses.get("Pinball_Loss_0.10", losses.get("Pinball_Loss_0.1", None))
+                    val_50 = losses.get("Pinball_Loss_0.50", losses.get("Pinball_Loss_0.5", None))
+                    val_90 = losses.get("Pinball_Loss_0.90", losses.get("Pinball_Loss_0.9", None))
+                    if val_10 is not None and val_50 is not None and val_90 is not None:
+                        avg_val = (float(val_10) + float(val_50) + float(val_90)) / 3.0
+                        pinball_col.append(f"{avg_val:.6f}")
+                    else:
+                        pinball_col.append(loss_str)
+                except Exception:
+                    pinball_col.append(loss_str)
+            else:
+                pinball_col.append("N/A")
+        else:
+            pinball_col.append("N/A")
+            
+    report_df["Pinball Loss"] = pinball_col
+    
+    # Save reports
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    
+    report_df.to_csv(reports_dir / "model_performance.csv", index=False)
+    report_df.to_csv(reports_dir / "model_comparison_table.csv", index=False)
+    
+    # Select best model (excluding mock models and test logs)
+    valid_models = report_df[~report_df["Model"].str.contains("mock|test", case=False, na=True)]
+    if valid_models.empty:
+        valid_models = report_df
+        
+    best_row = valid_models.sort_values(by="RMSE", ascending=True).iloc[0]
+    best_model_name = best_row["Model"]
+    
+    best_metrics = {
+        "MAE": float(best_row["MAE"]) if pd.notnull(best_row["MAE"]) else None,
+        "RMSE": float(best_row["RMSE"]) if pd.notnull(best_row["RMSE"]) else None,
+        "MAPE": float(best_row["MAPE"]) if pd.notnull(best_row["MAPE"]) else None,
+        "SMAPE": float(best_row["SMAPE"]) if pd.notnull(best_row["SMAPE"]) else None,
+        "R2": float(best_row["R²"]) if pd.notnull(best_row["R²"]) else None,
+        "PinballLoss": best_row["Pinball Loss"] if best_row["Pinball Loss"] != "N/A" else None
+    }
+    
+    best_model_meta = {
+        "best_model": best_model_name,
+        "selection_criterion": "Lowest RMSE",
+        "evaluation_metrics": best_metrics,
+        "generated_at": datetime.now().isoformat()
+    }
+    
+    with open(reports_dir / "best_model.json", "w", encoding="utf-8") as f:
+        json.dump(best_model_meta, f, indent=4)
+        
+    # Generate model_summary.md
+    summary_md = f"""# POWERGRID Demand Forecasting - Model Summary Report
+
+This report summarizes the comparative performance of all implemented forecasting models. All metrics are computed on the held-out chronological test dataset.
+
+## Model Comparison
+
+| Model | MAE | RMSE | MAPE (%) | SMAPE (%) | R² | Training Time (s) | Inference Time (s) | Pinball Loss |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+"""
+    for _, row in report_df.iterrows():
+        mae_val = f"{row['MAE']:.6f}" if pd.notnull(row['MAE']) else "N/A"
+        rmse_val = f"{row['RMSE']:.6f}" if pd.notnull(row['RMSE']) else "N/A"
+        mape_val = f"{row['MAPE']:.4f}" if pd.notnull(row['MAPE']) else "N/A"
+        smape_val = f"{row['SMAPE']:.4f}" if pd.notnull(row['SMAPE']) else "N/A"
+        r2_val = f"{row['R²']:.6f}" if pd.notnull(row['R²']) else "N/A"
+        t_time = f"{row['Training Time']:.4f}" if pd.notnull(row['Training Time']) else "N/A"
+        i_time = f"{row['Inference Time']:.4f}" if pd.notnull(row['Inference Time']) else "N/A"
+        pin_val = str(row["Pinball Loss"])
+        
+        summary_md += f"| {row['Model']} | {mae_val} | {rmse_val} | {mape_val} | {smape_val} | {r2_val} | {t_time} | {i_time} | {pin_val} |\n"
+        
+    summary_md += f"""
+---
+
+## Selection Results
+- **Selected Best Model**: `{best_model_name}`
+- **Selection Criterion**: Lowest RMSE on held-out chronological test set
+- **RMSE Score**: {best_metrics['RMSE']:.6f}
+- **Metadata Logged to**: [best_model.json](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/best_model.json)
+
+> [!NOTE]
+> All evaluation metrics reported above are computed on the independent chronological test dataset to ensure an unbiased comparison.
+"""
+    with open(reports_dir / "model_summary.md", "w", encoding="utf-8") as f:
+        f.write(summary_md)
+        
+    logger.info("Forecasting reports successfully generated.")
 
 def main():
     parser = argparse.ArgumentParser(description="POWERGRID Demand Forecasting Controller CLI (Module 3)")
@@ -120,7 +270,7 @@ def main():
         "--model",
         type=str,
         required=True,
-        choices=list_registered_models() + ["random_forest", "xgboost", "lightgbm", "lstm", "mlp", "svr", "prophet"],
+        choices=list_registered_models() + ["random_forest", "xgboost", "lightgbm_quantile", "lstm", "mlp", "svr", "prophet"],
         help="Target forecasting model name to run."
     )
     parser.add_argument(
