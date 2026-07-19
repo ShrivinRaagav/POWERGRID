@@ -1,6 +1,6 @@
 # AI-Based Material Demand Forecasting & Supply Chain Optimization for POWERGRID
 
-This project implements a robust, production-ready machine learning data collection, validation, and preprocessing pipeline for material planning in POWERGRID transmission projects. It is designed to satisfy the requirements of the Smart India Hackathon problem statement.
+This project implements a robust, production-ready machine learning data collection, validation, preprocessing, time-series decomposition, and forecasting pipeline for material planning in POWERGRID transmission projects. It is designed to satisfy the requirements of the Smart India Hackathon problem statement.
 
 The project architecture is inspired by the research paper: **"A Machine Learning-Based Approach for Multi-Objective, Multi-Product, and Multi-Period Supply Chain Optimization via Demand Forecasting."**
 
