@@ -183,28 +183,23 @@ class SHAPExplainerManager:
 
         if is_tree:
             logger.info(f"Initializing TreeExplainer for tree-based model: '{self.best_model_name}'")
-            target_estimator = estimator
-            if hasattr(estimator, "get_booster"):
-                try:
-                    import re
-                    booster = estimator.get_booster()
-                    raw_str = booster.save_raw("json").decode("utf-8")
-                    if '"base_score": "[' in raw_str or '"base_score": "[' in raw_str:
-                        cleaned_str = re.sub(r'"base_score":\s*"\[(.*?)\]"', r'"base_score": "\1"', raw_str)
-                        booster.load_model(bytearray(cleaned_str, "utf-8"))
-                    target_estimator = booster
-                except Exception as e_b:
-                    logger.debug(f"Booster base_score clean skipped: {e_b}")
-
             try:
-                self.explainer = shap.TreeExplainer(target_estimator)
-            except Exception as e:
-                logger.warning(f"TreeExplainer failed ({e}), falling back to KernelExplainer...")
-                bg_sample = shap.sample(self.X_train, min(30, len(self.X_train)))
-                self.explainer = shap.KernelExplainer(predict_fn, bg_sample)
+                # Direct TreeExplainer call on underlying scikit-learn / XGBoost estimator
+                self.explainer = shap.TreeExplainer(estimator)
+            except Exception as e1:
+                try:
+                    booster = getattr(estimator, "get_booster", lambda: None)()
+                    if booster is not None:
+                        self.explainer = shap.TreeExplainer(booster)
+                    else:
+                        raise e1
+                except Exception as e2:
+                    logger.warning(f"TreeExplainer failed ({e2}), falling back to KernelExplainer...")
+                    bg_sample = shap.sample(self.X_train, min(20, len(self.X_train)))
+                    self.explainer = shap.KernelExplainer(predict_fn, bg_sample)
         else:
             logger.info(f"Initializing KernelExplainer for model: '{self.best_model_name}'")
-            bg_sample = shap.sample(self.X_train, min(30, len(self.X_train)))
+            bg_sample = shap.sample(self.X_train, min(20, len(self.X_train)))
             self.explainer = shap.KernelExplainer(predict_fn, bg_sample)
 
     def compute_shap_values(self) -> shap.Explanation:
@@ -215,12 +210,17 @@ class SHAPExplainerManager:
         logger.info(f"Computing SHAP values on X_test (samples={len(self.X_test)})...")
 
         if isinstance(self.explainer, shap.KernelExplainer):
-            raw_shap = self.explainer.shap_values(self.X_test, nsamples=100)
+            eval_test = self.X_test.iloc[:min(100, len(self.X_test))]
+            raw_shap = self.explainer.shap_values(eval_test, nsamples=50)
+            target_test = eval_test
         else:
+            target_test = self.X_test
             try:
-                raw_shap = self.explainer(self.X_test)
+                raw_shap = self.explainer(target_test)
             except Exception:
-                raw_shap = self.explainer.shap_values(self.X_test)
+                raw_shap = self.explainer.shap_values(target_test)
+
+        self.target_test = target_test
 
         # Convert to standard Explanation object if numpy array returned
         if isinstance(raw_shap, np.ndarray):
@@ -232,8 +232,8 @@ class SHAPExplainerManager:
             
             self.shap_values = shap.Explanation(
                 values=self.shap_matrix,
-                base_values=np.full(len(self.X_test), self.expected_value),
-                data=self.X_test.values,
+                base_values=np.full(len(target_test), self.expected_value),
+                data=target_test.values,
                 feature_names=self.feature_names
             )
         elif isinstance(raw_shap, list):
@@ -246,15 +246,15 @@ class SHAPExplainerManager:
 
             self.shap_values = shap.Explanation(
                 values=self.shap_matrix,
-                base_values=np.full(len(self.X_test), self.expected_value),
-                data=self.X_test.values,
+                base_values=np.full(len(target_test), self.expected_value),
+                data=target_test.values,
                 feature_names=self.feature_names
             )
         else:
             self.shap_values = raw_shap
-            self.shap_matrix = np.asarray(raw_shap.values)
-            exp_v = raw_shap.base_values
-            if isinstance(exp_v, np.ndarray):
+            self.shap_matrix = getattr(raw_shap, "values", np.array([]))
+            exp_v = getattr(raw_shap, "base_values", 0.0)
+            if isinstance(exp_v, (np.ndarray, list)):
                 self.expected_value = float(np.mean(exp_v))
             else:
                 self.expected_value = float(exp_v)

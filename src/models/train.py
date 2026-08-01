@@ -138,9 +138,14 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        required=True,
-        choices=list_registered_models() + ["random_forest", "xgboost", "lightgbm_quantile", "lstm", "mlp", "svr", "prophet"],
-        help="Target forecasting model name to run."
+        default=None,
+        choices=list_registered_models() + ["random_forest", "xgboost", "lightgbm_quantile", "lstm", "mlp", "svr", "all"],
+        help="Target forecasting model name to run (or 'all' to train all models)."
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Train all registered models sequentially."
     )
     parser.add_argument(
         "--notes",
@@ -150,8 +155,19 @@ def main():
     )
     args = parser.parse_args()
     
-    # If the user selects a model that is configured but not yet registered, notify them.
     registered = list_registered_models()
+    
+    if args.all or (args.model and args.model.lower() == "all"):
+        logger.info("Training ALL registered forecasting models sequentially...")
+        models_to_train = [m for m in ["random_forest", "svr", "xgboost", "mlp", "lstm", "lightgbm_quantile"] if m in registered]
+        for m in models_to_train:
+            run_training_flow(model_name=m, notes=args.notes)
+        return
+
+    if not args.model:
+        parser.print_help()
+        return
+        
     model_lower = args.model.strip().lower()
     
     if model_lower not in registered:

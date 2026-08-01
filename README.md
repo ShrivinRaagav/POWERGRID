@@ -258,8 +258,9 @@ python -m src.optimization.run_optimization
 ### 6. Launch Interactive Streamlit Dashboard
 Launches the full interactive decision-support application:
 ```bash
-streamlit run dashboard/app.py
+python -m streamlit run dashboard/app.py
 ```
+*(Or `streamlit run dashboard/app.py` if Streamlit is added to system PATH)*
 
 ### 7. Run Unit Test Suite
 Runs all 67 automated unit tests across preprocessing, forecasting, evaluation, SHAP explainability, NSGA-II optimization, and dashboard loaders:

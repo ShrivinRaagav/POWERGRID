@@ -40,7 +40,7 @@ def run_explainability_pipeline(reports_dir: Path = REPORTS_DIR) -> Dict[str, An
     best_model_name = manager.best_model_name
     shap_matrix = manager.shap_matrix
     expected_val = manager.expected_value
-    X_test = manager.X_test
+    X_test = getattr(manager, "target_test", manager.X_test.iloc[:len(shap_matrix)])
     y_test = manager.y_test
     feature_names = manager.feature_names
 
@@ -48,7 +48,7 @@ def run_explainability_pipeline(reports_dir: Path = REPORTS_DIR) -> Dict[str, An
     csv_path = reports_dir / "shap_feature_importance.csv"
     importance_df = get_ranked_shap_feature_importance(shap_exp, feature_names, save_path=csv_path)
 
-    # 3. Model Predictions on Test Set
+    # 3. Model Predictions on Evaluated Test Set
     if hasattr(manager.model_wrapper, "predict"):
         y_pred = manager.model_wrapper.predict(X_test)
         if isinstance(y_pred, dict):
@@ -58,7 +58,8 @@ def run_explainability_pipeline(reports_dir: Path = REPORTS_DIR) -> Dict[str, An
         y_pred = underlying.predict(X_test)
 
     y_pred_arr = np.asarray(y_pred).flatten()
-    y_true_arr = y_test.values if hasattr(y_test, "values") else np.asarray(y_test).flatten()
+    y_true_raw = y_test.values if hasattr(y_test, "values") else np.asarray(y_test).flatten()
+    y_true_arr = y_true_raw[:len(X_test)]
 
     # 4. Representative Local Explanations
     rep_indices = identify_representative_samples(y_pred_arr)

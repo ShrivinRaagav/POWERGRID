@@ -2,13 +2,13 @@
     "best_model": "xgboost",
     "selection_criterion": "Lowest RMSE",
     "evaluation_metrics": {
-        "MAE": 150.320743,
-        "RMSE": 218.515741,
-        "MAPE": 30.674077,
-        "WMAPE": "27.68%",
-        "SMAPE": 42.823926,
-        "R2": 0.709838,
+        "MAE": 148.924324,
+        "RMSE": 217.52437,
+        "MAPE": 31.870051,
+        "WMAPE": "27.43%",
+        "SMAPE": 42.56662,
+        "R2": 0.712465,
         "PinballLoss": null
     },
-    "generated_at": "2026-08-01T19:14:15.653865"
+    "generated_at": "2026-08-01T22:11:03.562587"
 }
