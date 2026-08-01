@@ -40,33 +40,33 @@ def render_home_page():
 
     st.markdown(
         """
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; font-family: sans-serif;">
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 10px; border: 2px solid #003366; font-family: sans-serif;">
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="background-color: #003366; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="background-color: #003366; color: #ffffff; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
                     1. Operational Data Generation & Preprocessing Pipeline
                 </div>
-                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
-                <div style="background-color: #004080; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="text-align: center; color: #003366; font-weight: bold; font-size: 18px;">⬇️</div>
+                <div style="background-color: #004080; color: #ffffff; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
                     2. DWT & EMD Signal Processing & Feature Engineering
                 </div>
-                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
-                <div style="background-color: #0059b3; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="text-align: center; color: #003366; font-weight: bold; font-size: 18px;">⬇️</div>
+                <div style="background-color: #0059b3; color: #ffffff; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
                     3. ML Demand Forecasting Engine (Random Forest, SVR, XGBoost, MLP, LSTM, LightGBM Quantile)
                 </div>
-                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
-                <div style="background-color: #0073e6; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="text-align: center; color: #003366; font-weight: bold; font-size: 18px;">⬇️</div>
+                <div style="background-color: #0073e6; color: #ffffff; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
                     3.5 Statistical Significance Evaluation (Wilcoxon & Friedman Tests)
                 </div>
-                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
-                <div style="background-color: #1a8cff; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="text-align: center; color: #003366; font-weight: bold; font-size: 18px;">⬇️</div>
+                <div style="background-color: #1a8cff; color: #ffffff; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
                     4. SHAP Explainability & XAI Attributions (Beeswarm, Waterfalls & Dependence Plots)
                 </div>
-                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
-                <div style="background-color: #4da6ff; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="text-align: center; color: #003366; font-weight: bold; font-size: 18px;">⬇️</div>
+                <div style="background-color: #4da6ff; color: #002244; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
                     5. NSGA-II Multi-Objective Supply Chain Optimization & Pareto Compromise Solutions
                 </div>
-                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
-                <div style="background-color: #80c0ff; color: #002b80; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                <div style="text-align: center; color: #003366; font-weight: bold; font-size: 18px;">⬇️</div>
+                <div style="background-color: #e6f2ff; color: #002244; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; border: 1px solid #003366;">
                     6. Executive Decision Support Dashboard & Deployment
                 </div>
             </div>
