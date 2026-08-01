@@ -177,7 +177,7 @@ def run_pipeline(method: str = "ordinal") -> dict:
     
     # 7. Encode Categorical Columns
     stage_start = time.perf_counter()
-    encoder = CategoricalEncoder(method=method)
+    encoder = CategoricalEncoder(method=method, keep_original=(method == "onehot"))
     encoder.fit(train_eng)
     
     train_enc = encoder.transform(train_eng)
@@ -238,6 +238,11 @@ def run_pipeline(method: str = "ordinal") -> dict:
         csv_report_path=FS_RECONSTRUCTION_REPORT_PATH,
         md_report_path=FS_QUALITY_REPORT_PATH
     )
+
+    # Drop string categorical columns if onehot preserved them for grouping
+    string_cols_to_drop = [c for c in ["Material_Type", "Region"] if c in processed_enriched.columns and processed_enriched[c].dtype == 'object']
+    if string_cols_to_drop:
+        processed_enriched = processed_enriched.drop(columns=string_cols_to_drop)
     
     duration = time.perf_counter() - stage_start
     logger.info(f"Stage 'Time-Series Decomposition' completed in {duration:.4f}s.")

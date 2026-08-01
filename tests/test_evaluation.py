@@ -45,10 +45,10 @@ class TestMetrics(unittest.TestCase):
 
     def test_calculate_mape_zero_handling(self):
         y_true = np.array([0.0, 100.0])
-        y_pred = np.array([10.0, 100.0])
+        y_pred = np.array([10.0, 120.0])
         mape = calculate_mape(y_true, y_pred)
-        # Zero true value should be replaced by epsilon (1e-5), so error is 10 / 1e-5 = 1e6
-        self.assertGreater(mape, 10000.0)
+        # Zero true value should be ignored/masked out, leaving only |100 - 120| / 100 * 100 = 20%
+        self.assertAlmostEqual(mape, 20.0)
 
     def test_calculate_r2(self):
         r2 = calculate_r2(self.y_true, self.y_pred)

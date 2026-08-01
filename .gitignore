@@ -22,3 +22,7 @@ experiments/plots/
 # Logs
 logs/
 *.log
+
+# Document binaries
+*.pdf
+*.PDF

@@ -1,0 +1,6 @@
+Material_Type,Forecasted_Demand,Current_Inventory,Unit_Price_INR,Lead_Time_Weeks,Max_Warehouse_Capacity,Supplier_Max_Capacity,Recommended_Procurement_Qty,Safety_Stock_Qty,Reorder_Point,Expected_Inventory_Level,Estimated_Procurement_Cost_INR,Budget_Utilization_Pct,Service_Level_Pct
+Transformer_Oil,59316.91796875,1500.0,120.0,4.0,8000.0,12000.0,6433.14,79243.37,83806.21,-51383.78,771976.8,0.7837,13.37
+Conductor_ACSR,55673.37890625,2200.0,450.0,6.0,12000.0,18000.0,76.88,40515.21,46939.06,-53396.5,34596.0,0.0351,4.09
+Insulator_Porcelain,59831.8046875,3100.0,85.0,3.0,15000.0,25000.0,11893.69,39128.51,42580.34,-44838.11,1010963.65,1.0263,25.06
+Steel_Structure,51452.90625,1800.0,620.0,8.0,10000.0,15000.0,2.6,68405.2,76321.03,-49650.31,1612.0,0.0016,3.5
+Control_Cable,61564.78515625,2500.0,210.0,4.0,10000.0,20000.0,7453.71,62112.45,66848.2,-51611.08,1565279.1,1.5891,16.17

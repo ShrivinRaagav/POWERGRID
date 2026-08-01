@@ -8,3 +8,7 @@ pyyaml>=6.0
 PyWavelets>=1.4.0
 EMD-signal>=0.2.10
 statsmodels>=0.14.0
+scipy>=1.10.0
+shap>=0.45.0
+pymoo>=0.6.0
+streamlit>=1.30.0

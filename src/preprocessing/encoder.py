@@ -17,15 +17,17 @@ class CategoricalEncoder:
     
     Encoders are fit on Training data and applied to Val/Test data, and serialized via joblib.
     """
-    def __init__(self, method: str = "ordinal", save_dir: Path = MODELS_DIR):
+    def __init__(self, method: str = "ordinal", save_dir: Path = MODELS_DIR, keep_original: bool = False):
         """
         Parameters:
         method (str): 'ordinal' or 'onehot'
         save_dir (Path): directory to save fitted encoder models
+        keep_original (bool): if True, retains original string columns alongside encoded ones
         """
         self.method = method.lower()
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
+        self.keep_original = keep_original
         self.encoder = None
         self.is_fit = False
         self.encoded_cols: List[str] = []
@@ -94,8 +96,9 @@ class CategoricalEncoder:
                 columns=self.encoded_cols,
                 index=df_out.index
             )
-            # Drop original categorical columns and append encoded columns
-            df_out = df_out.drop(columns=self.categorical_cols)
+            # Drop original categorical columns if keep_original is False
+            if not self.keep_original:
+                df_out = df_out.drop(columns=self.categorical_cols)
             df_out = pd.concat([df_out, encoded_df], axis=1)
         elif self.method == "ordinal":
             encoded_array = self.encoder.transform(X_cat)
