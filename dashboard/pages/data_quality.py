@@ -10,9 +10,6 @@ def render_data_quality_page():
 
     st.markdown("---")
 
-    # Tabs for Data Quality breakdown
-    tab1, tab2, tab3, tab4 = st.columns(4)
-
     # 1. Dataset Preview & Summary
     df_proc = load_processed_dataset()
     if not df_proc.empty:

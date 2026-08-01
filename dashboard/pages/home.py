@@ -35,27 +35,50 @@ def render_home_page():
 
     st.markdown("---")
 
-    # 2. System Architecture Workflow
-    st.subheader("📌 System Architecture & Pipeline Workflow")
+    # 2. System Architecture Visual Workflow
+    st.subheader("📌 System Architecture & End-to-End Pipeline Workflow")
+
     st.markdown(
         """
-        ```mermaid
-        graph TD
-            A[Raw POWERGRID Supply Chain Data] --> B[Module 1: Preprocessing & Anomaly Validation]
-            B --> C[Module 2: DWT & EMD Signal Feature Engineering]
-            C --> D[Module 3: ML Forecasting Engine - 6 Models]
-            D --> E[Module 3.5: Statistical Analysis & Wilcoxon/Friedman Evaluation]
-            E --> F[Module 4: SHAP Explainability & XAI Attributions]
-            F --> G[Module 5: NSGA-II Multi-Objective Supply Chain Optimization]
-            G --> H[Module 6: Interactive Executive Decision Dashboard]
-        ```
-        """
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; font-family: sans-serif;">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="background-color: #003366; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    1. Operational Data Generation & Preprocessing Pipeline
+                </div>
+                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
+                <div style="background-color: #004080; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    2. DWT & EMD Signal Processing & Feature Engineering
+                </div>
+                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
+                <div style="background-color: #0059b3; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    3. ML Demand Forecasting Engine (Random Forest, SVR, XGBoost, MLP, LSTM, LightGBM Quantile)
+                </div>
+                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
+                <div style="background-color: #0073e6; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    3.5 Statistical Significance Evaluation (Wilcoxon & Friedman Tests)
+                </div>
+                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
+                <div style="background-color: #1a8cff; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    4. SHAP Explainability & XAI Attributions (Beeswarm, Waterfalls & Dependence Plots)
+                </div>
+                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
+                <div style="background-color: #4da6ff; color: white; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    5. NSGA-II Multi-Objective Supply Chain Optimization & Pareto Compromise Solutions
+                </div>
+                <div style="text-align: center; color: #003366; font-weight: bold;">⬇️</div>
+                <div style="background-color: #80c0ff; color: #002b80; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center;">
+                    6. Executive Decision Support Dashboard & Deployment
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     st.markdown("---")
 
     # 3. Module Completion Status
-    st.subheader("✅ Module Completion Matrix")
+    st.subheader("✅ Module Completion Status Matrix")
 
     mod_col1, mod_col2 = st.columns(2)
 
@@ -77,4 +100,4 @@ def render_home_page():
         )
 
     st.markdown("---")
-    st.info("Use the sidebar menu on the left to navigate between pages and inspect detailed modules.")
+    st.info("💡 Use the sidebar menu on the left to navigate between pages and inspect detailed module outputs.")

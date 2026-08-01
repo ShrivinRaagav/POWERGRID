@@ -7,15 +7,14 @@ from dashboard.utils import load_image
 
 def render_publication_figure(
     filepath: Path,
-    caption: str,
-    use_container_width: bool = True
+    caption: str
 ):
     """
     Renders 300 DPI IEEE publication figure with clean white background wrapper.
     """
     img = load_image(filepath)
     if img is not None:
-        st.image(img, caption=caption, use_container_width=use_container_width)
+        st.image(img, caption=caption, use_column_width="auto")
     else:
         st.info(f"Figure image not found at `{filepath.name}`")
 
