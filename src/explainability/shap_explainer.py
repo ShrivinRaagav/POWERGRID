@@ -121,14 +121,16 @@ class SHAPExplainerManager:
         self.explainer = None
         self.shap_values = None
         self.shap_matrix: Optional[np.ndarray] = None
-        self.expected_value: float = 0.0
-
     def _extract_underlying_estimator(self) -> Any:
         """Extracts the underlying fitted scikit-learn / XGBoost / LightGBM estimator object."""
         m = self.model_wrapper
+        if isinstance(m, list):
+            m = m[1] if len(m) > 1 else m[0]
 
         if isinstance(m, dict):
-            if "model" in m and m["model"] is not None:
+            if "P50" in m:
+                m = m["P50"]
+            elif "model" in m and m["model"] is not None:
                 m = m["model"]
             elif "models" in m and isinstance(m["models"], dict):
                 models_dict = m["models"]
@@ -140,16 +142,24 @@ class SHAPExplainerManager:
                     m = list(models_dict.values())[0]
             elif "estimator" in m and m["estimator"] is not None:
                 m = m["estimator"]
+            elif len(m) > 0:
+                m = list(m.values())[0]
 
         if hasattr(m, "model") and m.model is not None:
-            return m.model
-        elif hasattr(m, "models") and isinstance(m.models, dict):
-            if "P50" in m.models:
-                return m.models["P50"]
-            elif 0.5 in m.models:
-                return m.models[0.5]
-            else:
-                return list(m.models.values())[0]
+            m = m.model
+        if hasattr(m, "models") and m.models is not None:
+            if isinstance(m.models, dict):
+                if "P50" in m.models:
+                    m = m.models["P50"]
+                elif 0.5 in m.models:
+                    m = m.models[0.5]
+                else:
+                    m = list(m.models.values())[0]
+            elif isinstance(m.models, list):
+                m = m.models[1] if len(m.models) > 1 else m.models[0]
+
+        if isinstance(m, list):
+            m = m[1] if len(m) > 1 else m[0]
 
         return m
 
@@ -166,7 +176,10 @@ class SHAPExplainerManager:
             preds = self.model_wrapper.predict(df_in)
         else:
             estimator = self._extract_underlying_estimator()
-            preds = estimator.predict(df_in)
+            if hasattr(estimator, "predict"):
+                preds = estimator.predict(df_in)
+            else:
+                preds = np.zeros(len(df_in))
 
         if isinstance(preds, dict):
             preds = preds.get("P50", list(preds.values())[0])

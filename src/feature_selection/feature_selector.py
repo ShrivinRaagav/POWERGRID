@@ -81,15 +81,7 @@ class FeatureSelector:
         for col in protected_selected:
             self.feature_metadata[col]["Drop_Reason"] = "Protected"
             
-        # 1. Drop duplicated columns
-        dup_cols = find_duplicated_features(df, exclude_cols=self.keep_cols + [target_col])
-        for col in dup_cols:
-            self.dropped_features[col] = "Duplicated Column"
-            self.feature_metadata[col]["Drop_Reason"] = "Duplicated Column"
-            
-        candidate_features = [c for c in candidate_features if c not in dup_cols]
-        
-        # 2. Drop constant and low variance columns
+        # 1. Drop constant and low variance columns
         low_var_cols, variances = find_low_variance_features(
             df,
             threshold=self.variance_threshold,
@@ -99,12 +91,21 @@ class FeatureSelector:
             self.feature_metadata[col]["Variance"] = float(var)
             
         for col in low_var_cols:
-            if col not in self.dropped_features: # Avoid overwriting duplicated reason
-                reason = "Constant feature (variance = 0)" if variances[col] == 0.0 else f"Low variance ({variances[col]:.5f})"
-                self.dropped_features[col] = reason
-                self.feature_metadata[col]["Drop_Reason"] = reason
+            reason = "Constant feature (variance = 0)" if variances[col] == 0.0 else f"Low variance ({variances[col]:.5f})"
+            self.dropped_features[col] = reason
+            self.feature_metadata[col]["Drop_Reason"] = reason
                 
         candidate_features = [c for c in candidate_features if c not in low_var_cols]
+        
+        # 2. Drop duplicated columns from remaining non-constant candidates
+        df_candidates = df[candidate_features] if candidate_features else df
+        dup_cols = find_duplicated_features(df_candidates, exclude_cols=self.keep_cols + [target_col])
+        for col in dup_cols:
+            if col not in self.dropped_features:
+                self.dropped_features[col] = "Duplicated Column"
+                self.feature_metadata[col]["Drop_Reason"] = "Duplicated Column"
+            
+        candidate_features = [c for c in candidate_features if c not in dup_cols]
         
         # 3. Calculate feature importances on remaining candidates
         # Create a temp dataframe with only targets and candidates to calculate importances

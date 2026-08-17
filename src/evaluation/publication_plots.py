@@ -93,8 +93,9 @@ def _plot_metric_bar(
         )
 
     plt.xticks(rotation=15, ha="right")
+    save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_path, dpi=dpi, bbox_inches="tight", facecolor='white')
+    plt.savefig(str(save_path.resolve()), dpi=dpi, bbox_inches="tight", facecolor='white')
     plt.close(fig)
     logger.info(f"Saved publication plot to {save_path}")
 
@@ -137,8 +138,9 @@ def plot_actual_vs_predicted_best(
     axes[1].legend(loc="upper left", frameon=True, facecolor="white", edgecolor="black")
     axes[1].grid(True, linestyle="--", alpha=0.5, color="gray")
 
+    save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_path, dpi=dpi, bbox_inches="tight", facecolor='white')
+    plt.savefig(str(save_path.resolve()), dpi=dpi, bbox_inches="tight", facecolor='white')
     plt.close(fig)
     logger.info(f"Saved best model actual vs predicted plot to {save_path}")
 

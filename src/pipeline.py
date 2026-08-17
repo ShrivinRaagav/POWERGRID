@@ -99,7 +99,7 @@ def run_pipeline(method: str = "ordinal") -> dict:
     stage_start = time.perf_counter()
     if not RAW_DATA_PATH.exists():
         logger.info(f"Raw data not found at {RAW_DATA_PATH}. Generating new dataset...")
-        raw_df = generate_powergrid_data(6000)
+        raw_df = generate_powergrid_data(18000)
         RAW_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
         raw_df.to_csv(RAW_DATA_PATH, index=False)
         logger.info(f"Saved raw data to {RAW_DATA_PATH}")
@@ -177,7 +177,7 @@ def run_pipeline(method: str = "ordinal") -> dict:
     
     # 7. Encode Categorical Columns
     stage_start = time.perf_counter()
-    encoder = CategoricalEncoder(method=method, keep_original=(method == "onehot"))
+    encoder = CategoricalEncoder(method=method, keep_original=True)
     encoder.fit(train_eng)
     
     train_enc = encoder.transform(train_eng)

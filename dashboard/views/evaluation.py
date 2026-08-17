@@ -1,31 +1,34 @@
 import streamlit as st
 import pandas as pd
 from pathlib import Path
-from dashboard.utils import REPORTS_DIR, load_model_ranking_df, read_markdown_file
+from dashboard.utils import REPORTS_DIR, load_model_ranking_df
 from dashboard.components.tables import render_styled_dataframe
-from dashboard.components.charts import render_publication_figure
+from dashboard.components.charts import render_publication_figure, render_interactive_metrics_chart
 
 def render_evaluation_page():
-    """Renders Forecast Model Evaluation & Statistical Analysis page (Module 3.5)."""
-    st.title("⚖️ Module 3.5: Forecast Model Evaluation & Statistical Analysis")
-    st.markdown("Compares 6 forecasting models (Random Forest, SVR, XGBoost, MLP, LSTM, LightGBM Quantile) across accuracy, runtime efficiency, and statistical significance tests.")
+    """Renders Forecast Model Evaluation & Statistical Analysis page."""
+    st.title("⚖️ Model Performance & Statistical Evaluation")
 
-    st.markdown("---")
-
-    # 1. Interactive Model Ranking & Comparison Matrix
-    st.subheader("📊 Model Performance Comparison Matrix")
+    # 1. Model Leaderboard
+    st.subheader("📊 Model Performance Leaderboard")
     ranking_df = load_model_ranking_df()
-    render_styled_dataframe(ranking_df, title="Multi-Metric Model Evaluation Table", csv_filename="model_ranking.csv")
+    render_styled_dataframe(ranking_df, title="Model Evaluation Ranking Matrix", csv_filename="model_ranking.csv")
 
     st.markdown("---")
 
-    # 2. IEEE Publication Metric Comparison Figures
-    st.subheader("🖼️ Publication Metric Comparison Figures")
+    # 2. Interactive Metric Bar Comparisons
+    st.subheader("📈 Out-of-Sample Metric Comparisons")
+    render_interactive_metrics_chart(ranking_df)
+
+    st.markdown("---")
+
+    # 3. Model Comparison Figures
+    st.subheader("🖼️ Comparative Metric Figures")
 
     plots_dir = REPORTS_DIR / "model_plots"
 
     metric_fig_choice = st.selectbox(
-        "Select Metric Comparison Chart to Display",
+        "Select Metric Chart",
         options=[
             "RMSE Comparison (rmse_comparison.png)",
             "MAE Comparison (mae_comparison.png)",
@@ -53,19 +56,11 @@ def render_evaluation_page():
 
     st.markdown("---")
 
-    # 3. Statistical Analysis Reports & Significance Tests
-    st.subheader("🔬 Statistical Significance Tests (Wilcoxon & Friedman)")
-
-    stat_tab1, stat_tab2 = st.tabs(["📑 Statistical Report (statistical_evaluation.md)", "📋 Pairwise Wilcoxon Test CSV"])
-
-    with stat_tab1:
-        md_text = read_markdown_file(REPORTS_DIR / "statistical_evaluation.md")
-        st.markdown(md_text, unsafe_allow_html=True)
-
-    with stat_tab2:
-        wil_csv = REPORTS_DIR / "wilcoxon_results.csv"
-        if wil_csv.exists():
-            wil_df = pd.read_csv(wil_csv)
-            render_styled_dataframe(wil_df, title="Wilcoxon Signed-Rank Test Results", csv_filename="wilcoxon_results.csv")
-        else:
-            st.info("Wilcoxon results CSV file not found.")
+    # 4. Statistical Significance Tests
+    st.subheader("🔬 Pairwise Statistical Significance (Wilcoxon Test)")
+    wil_csv = REPORTS_DIR / "wilcoxon_results.csv"
+    if wil_csv.exists():
+        wil_df = pd.read_csv(wil_csv)
+        render_styled_dataframe(wil_df, title="Wilcoxon Signed-Rank Test Results", csv_filename="wilcoxon_results.csv")
+    else:
+        st.info("Wilcoxon results CSV file not found.")

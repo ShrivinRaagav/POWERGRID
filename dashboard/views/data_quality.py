@@ -1,47 +1,33 @@
 import streamlit as st
-from pathlib import Path
-from dashboard.utils import REPORTS_DIR, read_markdown_file, load_processed_dataset
+from dashboard.utils import load_processed_dataset
 from dashboard.components.tables import render_styled_dataframe
 
 def render_data_quality_page():
-    """Renders Data Quality, Preprocessing, and Validation page."""
-    st.title("📊 Module 1 & 2: Data Quality, Preprocessing & Feature Engineering")
-    st.markdown("Inspect raw vs. cleaned dataset metrics, temporal signal decompositions (DWT/EMD), and validation reports.")
-
-    st.markdown("---")
+    """Renders Data Quality, Preprocessing, and Sample Preview page."""
+    st.title("📊 Data Quality & Preprocessed Dataset Preview")
 
     # 1. Dataset Preview & Summary
     df_proc = load_processed_dataset()
     if not df_proc.empty:
+        g_reg = st.session_state.get("global_region", "ALL")
+        g_mat = st.session_state.get("global_material", "ALL")
+        
+        df_preview = df_proc.copy()
+        if g_reg != "ALL" and "Region" in df_preview.columns:
+            df_preview = df_preview[df_preview["Region"].astype(str).str.lower() == g_reg.lower()]
+        if g_mat != "ALL" and "Material_Type" in df_preview.columns:
+            df_preview = df_preview[df_preview["Material_Type"].astype(str).str.lower() == g_mat.lower()]
+
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Processed Dataset Records", f"{len(df_proc):,}")
+            st.metric("Total Processed Records", f"{len(df_proc):,}")
         with col2:
-            st.metric("Total Engineered Features", f"{len(df_proc.columns):,}")
+            st.metric("Engineered Features", f"{len(df_proc.columns):,}")
         with col3:
-            st.metric("Data Quality Check Status", "PASSED (100% Complete)")
+            st.metric("Filtered Records", f"{len(df_preview):,}")
 
-        st.subheader("📋 Processed Dataset Sample Preview")
-        render_styled_dataframe(df_proc.head(10), csv_filename="processed_dataset_sample.csv")
-
-    st.markdown("---")
-
-    # 2. Markdown Report Readers
-    st.subheader("📄 Markdown Data Quality & Dictionary Reports")
-    report_choice = st.selectbox(
-        "Select Report Document to View",
-        options=[
-            "Data Quality Report (data_quality_report.md)",
-            "Data Dictionary (data_dictionary.md)",
-            "Pipeline Diagram (pipeline_diagram.md)"
-        ]
-    )
-
-    if "Quality" in report_choice:
-        md_text = read_markdown_file(REPORTS_DIR / "data_quality_report.md")
-    elif "Dictionary" in report_choice:
-        md_text = read_markdown_file(REPORTS_DIR / "data_dictionary.md")
+        st.markdown("---")
+        st.subheader(f"📋 Dataset Sample Preview ({g_mat} | Region: {g_reg})")
+        render_styled_dataframe(df_preview.head(20), csv_filename="processed_dataset_sample.csv")
     else:
-        md_text = read_markdown_file(REPORTS_DIR / "pipeline_diagram.md")
-
-    st.markdown(md_text, unsafe_allow_html=True)
+        st.info("Processed dataset not found.")

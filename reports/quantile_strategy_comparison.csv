@@ -1,0 +1,7 @@
+Strategy,Material,RMSE,WMAPE,PICP,Average Interval Width,P90 Violations
+Experiment A (P10-P50-P90 Baseline),Conductor,35.36,2.27,50.0,290.0,1
+Experiment B (P05-P50-P95 Tailored),Conductor,35.36,2.27,50.0,380.25,1
+Experiment A (P10-P50-P90 Baseline),Hardware Fittings,2.0,13.33,100.0,16.5,0
+Experiment B (P05-P50-P95 Tailored),Hardware Fittings,2.0,13.33,100.0,16.5,0
+Experiment A (P10-P50-P90 Baseline),Transformer,20.0,3.64,100.0,160.0,0
+Experiment B (P05-P50-P95 Tailored),Transformer,20.0,3.64,100.0,160.0,0

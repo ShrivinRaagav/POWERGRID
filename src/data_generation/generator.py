@@ -13,7 +13,7 @@ logger = setup_logger("generator")
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 
-def generate_powergrid_data(num_rows: int = 6000) -> pd.DataFrame:
+def generate_powergrid_data(num_rows: int = 18000) -> pd.DataFrame:
     """
     Generates a realistic synthetic POWERGRID dataset for transmission line material planning.
     Simulates real-world operational scenarios:
@@ -56,9 +56,9 @@ def generate_powergrid_data(num_rows: int = 6000) -> pd.DataFrame:
     tower_types = ["Suspension", "Tension", "Terminal", "Transposition", "Angle"]
     substation_types = ["AIS (Air Insulated)", "GIS (Gas Insulated)", "Hybrid"]
     
-    # Setup timeline: 156 weeks (3 years)
-    start_date = datetime(2023, 1, 1)
-    dates = [start_date + timedelta(weeks=i) for i in range(156)]
+    # Setup timeline: 312 weeks (6 years, 2020-2025)
+    start_date = datetime(2020, 1, 1)
+    dates = [start_date + timedelta(weeks=i) for i in range(312)]
     
     # Create projects (including emergency ones)
     projects = [f"PG-PROJ-{i:03d}" for i in range(1, 26)]

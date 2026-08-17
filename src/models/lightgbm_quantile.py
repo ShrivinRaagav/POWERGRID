@@ -34,6 +34,8 @@ class LightGBMQuantileForecastModel(BaseForecastModel):
                 n_estimators=self.n_estimators,
                 num_leaves=self.num_leaves,
                 random_state=self.random_state,
+                verbosity=-1,
+                min_child_samples=5,
                 **self.kwargs
             )
         self.feature_cols = None

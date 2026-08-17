@@ -38,12 +38,13 @@ def prepare_time_series(
     df_out = df.copy()
     df_out[date_col] = pd.to_datetime(df_out[date_col])
     
-    # Define date range bounds based on the dataset
+    # Define date range bounds based on actual dates present in dataset
+    unique_dates = pd.DatetimeIndex(sorted(df_out[date_col].unique()))
+    all_dates = unique_dates
     min_date = df_out[date_col].min()
     max_date = df_out[date_col].max()
-    all_dates = pd.date_range(start=min_date, end=max_date, freq=freq)
     
-    logger.info(f"Preparing time series from {min_date.date()} to {max_date.date()} (Freq: {freq}, Fill Method: {fill_method})")
+    logger.info(f"Preparing time series from {min_date.date()} to {max_date.date()} ({len(all_dates)} unique timestamps, Fill Method: {fill_method})")
     
     if not group_cols:
         # Global aggregation
@@ -74,8 +75,11 @@ def prepare_time_series(
     results = []
     
     for name, group in grouped:
-        # Sum target values in case of duplicate dates within same group
-        group_agg = group.groupby(date_col)[target_col].sum().reset_index()
+        # Retain all feature columns by aggregating target with sum and features with mean/first
+        num_cols = [c for c in group.select_dtypes(include=[np.number]).columns if c != target_col and c not in group_cols]
+        agg_dict = {c: "mean" for c in num_cols}
+        agg_dict[target_col] = "sum"
+        group_agg = group.groupby(date_col).agg(agg_dict).reset_index()
         group_agg = group_agg.sort_values(by=date_col).set_index(date_col)
         
         # Reindex to full date range

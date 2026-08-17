@@ -12,7 +12,7 @@ This report summarizes the mathematical and signal processing quality of the Dis
 | **Decomposition Levels / Max IMFs** | `3` | `5` |
 | **Average Reconstruction RMSE** | `0.000000` | `0.000000` |
 | **Average Reconstruction Correlation** | `1.000000` | `1.000000` |
-| **Number of Time Series Groups** | `21` | `21` |
+| **Number of Time Series Groups** | `30` | `30` |
 
 ---
 
@@ -20,9 +20,9 @@ This report summarizes the mathematical and signal processing quality of the Dis
 
 ### 1. Empirical Mode Decomposition (EMD)
 - **Intrinsic Mode Functions (IMFs)**: EMD extracts dynamic, data-driven oscillatory modes.
-  - **Min IMFs extracted**: 5
+  - **Min IMFs extracted**: 6
   - **Max IMFs extracted**: 6
-  - **Average IMFs extracted**: 5.76
+  - **Average IMFs extracted**: 6.00
 - **Signal Reconstructibility**: The sifting process successfully decomposes demand. EMD reconstruction ($S_t = \sum IMF_i + R_t$) achieves an average correlation of **100.0000%** with the original signal.
 
 ### 2. Discrete Wavelet Transform (DWT)
@@ -30,9 +30,9 @@ This report summarizes the mathematical and signal processing quality of the Dis
 - **Signal Reconstructibility**: Inverse DWT (`pywt.waverec`) achieves an average correlation of **100.0000%** with the original signal, confirming zero-loss numeric transformation.
 
 ### 3. Supply Chain Dynamics
-- **Average Trend Strength ($F_T$)**: `0.6070`
+- **Average Trend Strength ($F_T$)**: `0.7558`
   - Represents the proportion of demand variance explained by the low-frequency project baseline.
-- **Average Seasonality Strength ($F_S$)**: `0.3774`
+- **Average Seasonality Strength ($F_S$)**: `0.3023`
   - Represents the strength of cyclic variations (monsoons, holiday slowdowns, weather waves) within the dataset.
 
 ---

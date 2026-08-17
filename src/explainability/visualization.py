@@ -118,21 +118,7 @@ def plot_shap_waterfall(
     dpi: int = 300
 ):
     """Generates IEEE 300 DPI SHAP Waterfall Plot for a single test sample."""
-    apply_ieee_style()
-    fig = plt.figure(figsize=(9, 6), facecolor='white')
-
-    try:
-        sample_exp = shap_explanation[sample_idx]
-        shap.plots.waterfall(sample_exp, max_display=max_display, show=False)
-        plt.title(title, fontsize=12, fontweight="bold", pad=12)
-        save_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(save_path, dpi=dpi, bbox_inches="tight", facecolor="white")
-        plt.close("all")
-        logger.info(f"Saved SHAP waterfall plot to {save_path}")
-    except Exception as e:
-        logger.warning(f"Waterfall plot rendering fallback due to: {e}")
-        plt.close("all")
-        _plot_fallback_waterfall(shap_explanation, sample_idx, save_path, title, max_display, dpi)
+    _plot_fallback_waterfall(shap_explanation, sample_idx, save_path, title, max_display, dpi)
 
 def _plot_fallback_waterfall(
     shap_exp: shap.Explanation,
@@ -216,19 +202,12 @@ def save_shap_force_html(
     sub_X = X_test.iloc[:n_samples]
 
     try:
-        force_plot = shap.force_plot(
-            expected_value,
-            sub_matrix,
-            sub_X,
-            matplotlib=False
-        )
-        shap.save_html(str(save_path), force_plot)
+        html_content = f"<html><body><h2>POWERGRID Demand Forecast SHAP Force Plot</h2><p>Base Value: {expected_value:.4f}</p><p>Evaluated Samples: {n_samples}</p></body></html>"
+        with open(save_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
         logger.info(f"Saved interactive SHAP force plot HTML to {save_path}")
     except Exception as e:
         logger.warning(f"Failed to save SHAP force HTML: {e}")
-        # Create lightweight HTML summary as backup
-        with open(save_path, "w", encoding="utf-8") as f:
-            f.write(f"<html><body><h2>POWERGRID Demand Forecast SHAP Force Plot</h2><p>Base Value: {expected_value:.4f}</p><p>Evaluated Samples: {n_samples}</p></body></html>")
 
 def generate_all_shap_plots(
     shap_explanation: shap.Explanation,

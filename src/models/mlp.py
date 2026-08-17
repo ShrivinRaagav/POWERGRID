@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, Optional, List
 from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
 from src.models.base_model import BaseForecastModel
 from src.models.registry import register_model
 from src.evaluation.metrics import evaluate_all_metrics
@@ -16,6 +17,7 @@ class MLPForecastModel(BaseForecastModel):
     """
     Multi-Layer Perceptron (MLP) forecasting model for material demand prediction.
     Obtains all network and learning configurations from config.yaml.
+    Uses input/target standard scaling for neural network optimization stability.
     """
     def __init__(self, hidden_layer_sizes: List[int] = [100, 50], activation: str = "relu", learning_rate: str = "constant", learning_rate_init: float = 0.001, max_iter: int = 500, batch_size: str = "auto", random_state: int = 42, **kwargs):
         self.hidden_layer_sizes = list(hidden_layer_sizes)
@@ -39,8 +41,11 @@ class MLPForecastModel(BaseForecastModel):
             max_iter=self.max_iter,
             batch_size=parsed_batch_size,
             random_state=self.random_state,
+            early_stopping=True,
             **self.kwargs
         )
+        self.scaler_x = StandardScaler()
+        self.scaler_y = StandardScaler()
         self.feature_cols = None
         self.impute_values = None
         self.is_fitted = False
@@ -52,14 +57,17 @@ class MLPForecastModel(BaseForecastModel):
         X_val: Optional[pd.DataFrame] = None,
         y_val: Optional[pd.Series] = None
     ) -> None:
-        logger.info("Training MLPRegressor...")
+        logger.info("Training MLPRegressor with feature & target normalization...")
         self.feature_cols = list(X_train.columns)
         
         # Calculate training medians for robust imputation
         self.impute_values = X_train.median().fillna(0.0)
         X_train_imputed = X_train.fillna(self.impute_values)
         
-        self.model.fit(X_train_imputed, y_train)
+        X_train_scaled = self.scaler_x.fit_transform(X_train_imputed)
+        y_train_scaled = self.scaler_y.fit_transform(y_train.values.reshape(-1, 1)).ravel()
+        
+        self.model.fit(X_train_scaled, y_train_scaled)
         self.is_fitted = True
         logger.info("MLPRegressor training completed.")
 
@@ -68,7 +76,10 @@ class MLPForecastModel(BaseForecastModel):
             raise RuntimeError("MLPRegressor is not fitted yet.")
         X_aligned = X[self.feature_cols]
         X_imputed = X_aligned.fillna(self.impute_values)
-        return self.model.predict(X_imputed)
+        X_scaled = self.scaler_x.transform(X_imputed)
+        preds_scaled = self.model.predict(X_scaled)
+        preds = self.scaler_y.inverse_transform(preds_scaled.reshape(-1, 1)).ravel()
+        return preds
 
     def evaluate(self, X: pd.DataFrame, y: pd.Series) -> Dict[str, float]:
         logger.info("Evaluating MLPRegressor...")
@@ -79,6 +90,8 @@ class MLPForecastModel(BaseForecastModel):
         logger.info(f"Saving MLPRegressor to {filepath}...")
         state = {
             "model": self.model,
+            "scaler_x": self.scaler_x,
+            "scaler_y": self.scaler_y,
             "feature_cols": self.feature_cols,
             "impute_values": self.impute_values,
             "is_fitted": self.is_fitted,
@@ -96,6 +109,8 @@ class MLPForecastModel(BaseForecastModel):
         logger.info(f"Loading MLPRegressor from {filepath}...")
         state = joblib.load(filepath)
         self.model = state["model"]
+        self.scaler_x = state.get("scaler_x", StandardScaler())
+        self.scaler_y = state.get("scaler_y", StandardScaler())
         self.feature_cols = state["feature_cols"]
         self.impute_values = state.get("impute_values")
         self.is_fitted = state["is_fitted"]

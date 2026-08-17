@@ -10,8 +10,8 @@ The dataset models transmission line material logistics for POWERGRID projects. 
 ---
 
 ## 2. Number of Records
-*   **Raw Dataset Size**: 6060 rows, 22 columns.
-*   **Cleaned/Preprocessed Dataset Size**: 4199 rows, 44 columns.
+*   **Raw Dataset Size**: 18180 rows, 22 columns.
+*   **Cleaned/Preprocessed Dataset Size**: 12590 rows, 44 columns.
 *   **Split Allocation**:
     *   *Training Split (70%)*: 4,199 rows
     *   *Validation Split (15%)*: 872 rows
@@ -20,14 +20,14 @@ The dataset models transmission line material logistics for POWERGRID projects. 
 ---
 
 ## 3. Missing Values
-*   **Raw Missing Count**: 225 null values across variables `Lead_Time_Days`, `Historical_Demand`, `Current_Inventory`, `Weather`, and `Supplier_Risk`.
+*   **Raw Missing Count**: 684 null values across variables `Lead_Time_Days`, `Historical_Demand`, `Current_Inventory`, `Weather`, and `Supplier_Risk`.
 *   **Imputation Strategy**: All null values were imputed based on the training split parameters to prevent data leakage (numerical columns imputed with training medians, categorical columns imputed with training modes).
 *   **Cleaned Missing Count**: 0 null values.
 
 ---
 
 ## 4. Duplicates Removed
-*   **Staged Duplicates in Raw Data**: 60 duplicate records.
+*   **Staged Duplicates in Raw Data**: 180 duplicate records.
 *   **Deduplication Strategy**: Rows containing identical variables were removed, resulting in 0 duplicate records in the preprocessed stage.
 
 ---
@@ -41,11 +41,13 @@ The dataset models transmission line material logistics for POWERGRID projects. 
 ## 6. Outlier Summary
 To prevent extreme numerical shocks from distorting forecast models (MLP, LSTM, SVR, etc.), outliers were capped using Interquartile Range (IQR) bounds $[Q1 - 1.5\times\text{IQR}, Q3 + 1.5\times\text{IQR}]$ fit on the training split:
 
-- **Historical_Demand**: 227 values adjusted/capped.
-- **Current_Inventory**: 104 values adjusted/capped.
-- **Lead_Time_Days**: 87 values adjusted/capped.
-- **Supplier_Risk**: 293 values adjusted/capped.
-- **Transportation_Cost**: 260 values adjusted/capped.
+- **Historical_Demand**: 658 values adjusted/capped.
+- **Current_Inventory**: 1032 values adjusted/capped.
+- **Lead_Time_Days**: 214 values adjusted/capped.
+- **Supplier_Risk**: 658 values adjusted/capped.
+- **Commodity_Price**: 1156 values adjusted/capped.
+- **Transportation_Cost**: 586 values adjusted/capped.
+- **Project_Budget**: 98 values adjusted/capped.
 
 ---
 
@@ -64,25 +66,25 @@ The validation test log below shows pre-cleaning (raw stage) failures and post-c
 | raw | Missing Values Check | Project_Phase | **PASS** | 0 | Checks if column Project_Phase contains null values. |
 | raw | Missing Values Check | Tower_Type | **PASS** | 0 | Checks if column Tower_Type contains null values. |
 | raw | Missing Values Check | Substation_Type | **PASS** | 0 | Checks if column Substation_Type contains null values. |
-| raw | Missing Values Check | Historical_Demand | **FAIL** | 48 | Checks if column Historical_Demand contains null values. |
-| raw | Missing Values Check | Current_Inventory | **FAIL** | 30 | Checks if column Current_Inventory contains null values. |
-| raw | Missing Values Check | Lead_Time_Days | **FAIL** | 49 | Checks if column Lead_Time_Days contains null values. |
-| raw | Missing Values Check | Supplier_Risk | **FAIL** | 49 | Checks if column Supplier_Risk contains null values. |
+| raw | Missing Values Check | Historical_Demand | **FAIL** | 147 | Checks if column Historical_Demand contains null values. |
+| raw | Missing Values Check | Current_Inventory | **FAIL** | 93 | Checks if column Current_Inventory contains null values. |
+| raw | Missing Values Check | Lead_Time_Days | **FAIL** | 148 | Checks if column Lead_Time_Days contains null values. |
+| raw | Missing Values Check | Supplier_Risk | **FAIL** | 148 | Checks if column Supplier_Risk contains null values. |
 | raw | Missing Values Check | Commodity_Price | **PASS** | 0 | Checks if column Commodity_Price contains null values. |
 | raw | Missing Values Check | Transportation_Cost | **PASS** | 0 | Checks if column Transportation_Cost contains null values. |
 | raw | Missing Values Check | Storage_Capacity | **PASS** | 0 | Checks if column Storage_Capacity contains null values. |
 | raw | Missing Values Check | Production_Capacity | **PASS** | 0 | Checks if column Production_Capacity contains null values. |
 | raw | Missing Values Check | Project_Budget | **PASS** | 0 | Checks if column Project_Budget contains null values. |
-| raw | Missing Values Check | Weather | **FAIL** | 49 | Checks if column Weather contains null values. |
+| raw | Missing Values Check | Weather | **FAIL** | 148 | Checks if column Weather contains null values. |
 | raw | Missing Values Check | Season | **PASS** | 0 | Checks if column Season contains null values. |
 | raw | Missing Values Check | Quantity_Required | **PASS** | 0 | Checks if column Quantity_Required contains null values. |
-| raw | Duplicate Records Check | ALL_COLUMNS | **FAIL** | 60 | Checks for identical rows in the dataset. |
-| raw | Negative Inventory Check | Current_Inventory | **FAIL** | 19 | Checks for negative values in the current inventory column. |
-| raw | Negative Demand Check | Quantity_Required | **FAIL** | 18 | Checks for negative values in the quantity required (demand) column. |
-| raw | Negative Historical Demand Check | Historical_Demand | **FAIL** | 18 | Checks for negative values in the historical demand column. |
-| raw | Invalid Date Formats or Range | Date | **FAIL** | 24 | Checks if date format is parseable and falls between 2020 and 2030. |
-| raw | Invalid Region Code | Region | **FAIL** | 18 | Checks if region matches one of the valid codes: ['NR', 'ER', 'WR', 'SR', 'NER'] |
-| raw | Invalid Project Phase | Project_Phase | **FAIL** | 18 | Checks if project phase matches: ['Planning', 'Foundation', 'Tower Erection', 'Stringing', 'Testing & Commissioning'] |
+| raw | Duplicate Records Check | ALL_COLUMNS | **FAIL** | 180 | Checks for identical rows in the dataset. |
+| raw | Negative Inventory Check | Current_Inventory | **FAIL** | 55 | Checks for negative values in the current inventory column. |
+| raw | Negative Demand Check | Quantity_Required | **FAIL** | 54 | Checks for negative values in the quantity required (demand) column. |
+| raw | Negative Historical Demand Check | Historical_Demand | **FAIL** | 54 | Checks for negative values in the historical demand column. |
+| raw | Invalid Date Formats or Range | Date | **FAIL** | 72 | Checks if date format is parseable and falls between 2020 and 2030. |
+| raw | Invalid Region Code | Region | **FAIL** | 54 | Checks if region matches one of the valid codes: ['NR', 'ER', 'WR', 'SR', 'NER'] |
+| raw | Invalid Project Phase | Project_Phase | **FAIL** | 54 | Checks if project phase matches: ['Planning', 'Foundation', 'Tower Erection', 'Stringing', 'Testing & Commissioning'] |
 | cleaned | Missing Values Check | Project_ID | **PASS** | 0 | Checks if column Project_ID contains null values. |
 | cleaned | Missing Values Check | Date | **PASS** | 0 | Checks if column Date contains null values. |
 | cleaned | Missing Values Check | Region | **PASS** | 0 | Checks if column Region contains null values. |
@@ -142,19 +144,19 @@ The following statistics describe the engineered variables computed on the train
 
 | Feature Name | Mean | Median | Std Dev | Min | Max |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Lag_1 | 281.7226 | 164.0000 | 311.5279 | 0.0000 | 1075.0000 |
-| Lag_2 | 278.0069 | 164.0000 | 308.2889 | 0.0000 | 1075.0000 |
-| Lag_3 | 274.3648 | 164.0000 | 305.1143 | 0.0000 | 1075.0000 |
-| Rolling_Mean_3 | 276.9069 | 164.0000 | 297.1950 | 0.0000 | 1075.0000 |
-| Rolling_Mean_6 | 270.3328 | 162.8333 | 288.4998 | 0.0000 | 1075.0000 |
-| Inventory_Utilization | 0.1188 | 0.0664 | 0.1274 | 0.0000 | 0.6434 |
-| Lead_Time_Category | 0.8133 | 1.0000 | 0.7248 | 0.0000 | 2.0000 |
-| Demand_Growth | 0.1267 | 0.0000 | 0.6210 | -0.9984 | 2.0000 |
-| Inventory_Coverage | 10.5730 | 1.2478 | 17.9365 | 0.0000 | 52.0000 |
-| Budget_Utilization | 0.2569 | 0.1309 | 0.3318 | 0.0000 | 2.2909 |
-| Supplier_Risk_Score | 0.1551 | 0.1066 | 0.1389 | 0.0042 | 0.6499 |
-| Seasonal_Demand_Index | 1.0000 | 0.8691 | 0.3262 | 0.5772 | 1.6993 |
-| Transportation_Cost_Index | 0.4950 | 0.4500 | 0.2121 | 0.2000 | 1.2748 |
+| Lag_1 | 280.3025 | 160.0000 | 312.6494 | 0.0000 | 1077.5000 |
+| Lag_2 | 278.4149 | 160.0000 | 311.0103 | 0.0000 | 1077.5000 |
+| Lag_3 | 276.5593 | 160.0000 | 309.2987 | 0.0000 | 1077.5000 |
+| Rolling_Mean_3 | 277.9092 | 166.6667 | 300.2694 | 0.0000 | 1077.5000 |
+| Rolling_Mean_6 | 274.4063 | 166.0000 | 294.0213 | 0.0000 | 1077.5000 |
+| Inventory_Utilization | 0.0847 | 0.0433 | 0.1026 | 0.0000 | 0.5303 |
+| Lead_Time_Category | 0.8276 | 1.0000 | 0.7393 | 0.0000 | 2.0000 |
+| Demand_Growth | 0.1257 | 0.0000 | 0.6219 | -0.9991 | 2.0000 |
+| Inventory_Coverage | 7.0523 | 1.0385 | 14.7634 | 0.0000 | 52.0000 |
+| Budget_Utilization | 0.2717 | 0.1389 | 0.3569 | 0.0000 | 2.7780 |
+| Supplier_Risk_Score | 0.1489 | 0.1038 | 0.1295 | 0.0030 | 0.6283 |
+| Seasonal_Demand_Index | 1.0000 | 0.9631 | 0.1649 | 0.7943 | 1.3827 |
+| Transportation_Cost_Index | 0.5561 | 0.4951 | 0.2467 | 0.2000 | 1.4619 |
 
 ---
 

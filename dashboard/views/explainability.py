@@ -1,85 +1,131 @@
 import streamlit as st
 import pandas as pd
 from pathlib import Path
-from dashboard.utils import REPORTS_DIR, load_shap_importance_df, read_markdown_file
+from dashboard.utils import REPORTS_DIR, load_shap_importance_df
 from dashboard.components.tables import render_styled_dataframe
 from dashboard.components.charts import render_publication_figure
 
 def render_explainability_page():
-    """Renders SHAP Explainability & XAI attributions page (Module 4)."""
-    st.title("🔍 Module 4: SHAP Explainability & XAI Transparency")
-    st.markdown("Interprets global feature attributions and local prediction equations using game-theoretic Shapley values.")
+    """Renders SHAP Explainability & Feature Attributions page."""
+    st.title("🔍 Model Explainability & Feature Attributions")
 
-    st.markdown("---")
-
-    # 1. Global Feature Importance Table
-    st.subheader("🏆 Ranked Global Feature Importance (|mean SHAP|)")
-    shap_df = load_shap_importance_df()
-    if not shap_df.empty:
-        render_styled_dataframe(shap_df.head(15), title="Top 15 Predictive Feature Drivers", csv_filename="shap_feature_importance.csv")
-    else:
-        st.info("SHAP feature importance CSV not found.")
-
-    st.markdown("---")
-
-    # 2. Publication SHAP Visualizations
-    st.subheader("🖼️ Publication SHAP Figures")
+    # ---------------------------------------------------------
+    # SECTION 1: Global Feature Importance
+    # ---------------------------------------------------------
+    st.subheader("1️⃣ Global Feature Attributions")
 
     shap_plots_dir = REPORTS_DIR / "shap_plots"
 
-    vis_tab1, vis_tab2, vis_tab3, vis_tab4 = st.tabs([
-        "🐝 Beeswarm Summary Plot",
-        "📊 Importance Bar Plot",
-        "🌊 Local Waterfall Case Studies",
-        "📈 Dependence Plots"
+    glob_tab1, glob_tab2, glob_tab3 = st.tabs([
+        "🐝 SHAP Summary Plot (Beeswarm)",
+        "🏆 Feature Importance Table",
+        "📊 Global Importance Bar Plot"
     ])
 
-    with vis_tab1:
-        render_publication_figure(shap_plots_dir / "shap_summary.png", caption="Figure 1: SHAP Beeswarm Summary Plot (Feature Value Impact on Forecast)")
-
-    with vis_tab2:
-        render_publication_figure(shap_plots_dir / "shap_bar.png", caption="Figure 2: Global Mean Absolute SHAP Value Importance Bar Chart")
-
-    with vis_tab3:
-        waterfall_choice = st.selectbox(
-            "Select Demand Scenario Case Study",
-            options=["Highest Demand Sample", "Median Demand Sample", "Lowest Demand Sample"]
+    with glob_tab1:
+        render_publication_figure(
+            shap_plots_dir / "shap_summary.png", 
+            caption="Global SHAP Beeswarm Summary Plot"
         )
-        if "Highest" in waterfall_choice:
-            wf_file = "shap_waterfall_highest.png"
-        elif "Median" in waterfall_choice:
-            wf_file = "shap_waterfall_median.png"
+
+    with glob_tab2:
+        shap_df = load_shap_importance_df()
+        if not shap_df.empty:
+            render_styled_dataframe(shap_df.head(15), title="Top 15 Feature Drivers (|mean SHAP|)", csv_filename="shap_feature_importance.csv")
         else:
-            wf_file = "shap_waterfall_lowest.png"
+            st.info("SHAP feature importance CSV not found.")
 
-        render_publication_figure(shap_plots_dir / wf_file, caption=f"Local Waterfall Explanation: {waterfall_choice}")
-
-    with vis_tab4:
-        dep_choice = st.selectbox(
-            "Select Feature Dependence Plot",
-            options=[
-                "Feature 1: EMD_IMF_6 (dependence_feature_1.png)",
-                "Feature 2: EMD_IMF_5 (dependence_feature_2.png)",
-                "Feature 3: Classical_Residual (dependence_feature_3.png)",
-                "Feature 4: Classical_Seasonal (dependence_feature_4.png)",
-                "Feature 5: EMD_IMF_4 (dependence_feature_5.png)"
-            ]
+    with glob_tab3:
+        render_publication_figure(
+            shap_plots_dir / "shap_bar.png", 
+            caption="Global Mean Absolute SHAP Feature Attributions"
         )
-        idx_str = dep_choice.split(":")[0].split(" ")[1]
-        dep_file = f"dependence_feature_{idx_str}.png"
-        render_publication_figure(shap_plots_dir / dep_file, caption=f"Dependence Plot: {dep_choice}")
 
     st.markdown("---")
 
-    # 3. Markdown XAI Reports
-    st.subheader("📑 Markdown Explainability Reports")
+    # ---------------------------------------------------------
+    # SECTION 2: Local Prediction Waterfall Breakdown
+    # ---------------------------------------------------------
+    st.subheader("2️⃣ Local Prediction Breakdown (Waterfall Analysis)")
 
-    report_tab1, report_tab2 = st.tabs(["📄 Comprehensive SHAP Report", "📄 Local Explanations Report"])
+    waterfall_choice = st.selectbox(
+        "Select Prediction Case Study",
+        options=[
+            "Highest Demand Sample (Peak Demand)",
+            "Median Demand Sample (Standard Operation)",
+            "Lowest Demand Sample (Baseline Inventory)"
+        ]
+    )
 
-    with report_tab1:
-        md_text1 = read_markdown_file(REPORTS_DIR / "shap_report.md")
-        st.markdown(md_text1, unsafe_allow_html=True)
+    if "Highest" in waterfall_choice:
+        wf_file = "shap_waterfall_highest.png"
+    elif "Median" in waterfall_choice:
+        wf_file = "shap_waterfall_median.png"
+    else:
+        wf_file = "shap_waterfall_lowest.png"
 
-    with report_tab2:
-        md_text2 = read_markdown_file(REPORTS_DIR / "local_explanations.md")
-        st.markdown(md_text2, unsafe_allow_html=True)
+    render_publication_figure(shap_plots_dir / wf_file, caption=f"SHAP Waterfall: {waterfall_choice}")
+
+    st.markdown("---")
+
+    # ---------------------------------------------------------
+    # SECTION 3: Material Uncertainty Risk Matrix
+    # ---------------------------------------------------------
+    st.subheader("3️⃣ Material Uncertainty Risk Matrix & Coverage")
+
+    mat_analysis_path = REPORTS_DIR / "material_uncertainty_analysis.csv"
+    mat_analysis_df = pd.read_csv(mat_analysis_path) if mat_analysis_path.exists() else pd.DataFrame()
+
+    uc_col1, uc_col2, uc_col3 = st.columns(3)
+    with uc_col1:
+        st.metric("Overall PICP Coverage", "89.65%")
+    with uc_col2:
+        st.metric("Avg Interval Width", "286.46 Units")
+    with uc_col3:
+        st.metric("P90 Violation Rate", "6.32%")
+
+    uc_tab1, uc_tab2, uc_tab3 = st.tabs([
+        "📊 Material Risk Matrix",
+        "📈 Coverage Timeline Plot",
+        "🔬 Quantile Strategy Experiment"
+    ])
+
+    with uc_tab1:
+        if not mat_analysis_df.empty:
+            risk_summary = mat_analysis_df.groupby("Material").agg({
+                "Total Samples": "sum",
+                "PICP": "mean",
+                "Average_Interval_Width": "mean",
+                "P90_Violations": "sum",
+                "Demand_Std": "mean"
+            }).reset_index()
+
+            risk_summary["P90_Violation_Pct"] = (risk_summary["P90_Violations"] / risk_summary["Total Samples"]) * 100.0
+            
+            def get_risk_level(row):
+                if row["P90_Violation_Pct"] > 10.0 or row["PICP"] < 80.0:
+                    return "🔴 High Volatility (Demand Spikes)"
+                elif row["PICP"] > 95.0 and row["Average_Interval_Width"] > 1.5 * row["Demand_Std"]:
+                    return "🟡 Wide Buffer"
+                else:
+                    return "🟢 Well-Calibrated"
+
+            risk_summary["Status"] = risk_summary.apply(get_risk_level, axis=1)
+
+            display_cols = ["Material", "PICP", "Average_Interval_Width", "P90_Violations", "Status"]
+            risk_matrix_df = risk_summary[display_cols].rename(columns={"Average_Interval_Width": "Interval Width"})
+            render_styled_dataframe(risk_matrix_df, title="Material Calibration Matrix", csv_filename="material_risk_matrix.csv")
+        else:
+            st.info("Material uncertainty analysis CSV not found.")
+
+    with uc_tab2:
+        cov_plot_path = REPORTS_DIR / "important_plots" / "prediction_interval_coverage.png"
+        render_publication_figure(cov_plot_path, caption="LightGBM Quantile Prediction Interval Coverage")
+
+    with uc_tab3:
+        strat_path = REPORTS_DIR / "quantile_strategy_comparison.csv"
+        if strat_path.exists():
+            strat_df = pd.read_csv(strat_path)
+            render_styled_dataframe(strat_df, title="Quantile Strategy Comparison", csv_filename="quantile_strategy_comparison.csv")
+        else:
+            st.info("Quantile strategy comparison CSV not found.")

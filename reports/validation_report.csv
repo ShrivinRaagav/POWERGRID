@@ -9,25 +9,25 @@ raw,Missing Values Check,Material_Type,PASS,0,Checks if column Material_Type con
 raw,Missing Values Check,Project_Phase,PASS,0,Checks if column Project_Phase contains null values.
 raw,Missing Values Check,Tower_Type,PASS,0,Checks if column Tower_Type contains null values.
 raw,Missing Values Check,Substation_Type,PASS,0,Checks if column Substation_Type contains null values.
-raw,Missing Values Check,Historical_Demand,FAIL,48,Checks if column Historical_Demand contains null values.
-raw,Missing Values Check,Current_Inventory,FAIL,30,Checks if column Current_Inventory contains null values.
-raw,Missing Values Check,Lead_Time_Days,FAIL,49,Checks if column Lead_Time_Days contains null values.
-raw,Missing Values Check,Supplier_Risk,FAIL,49,Checks if column Supplier_Risk contains null values.
+raw,Missing Values Check,Historical_Demand,FAIL,147,Checks if column Historical_Demand contains null values.
+raw,Missing Values Check,Current_Inventory,FAIL,93,Checks if column Current_Inventory contains null values.
+raw,Missing Values Check,Lead_Time_Days,FAIL,148,Checks if column Lead_Time_Days contains null values.
+raw,Missing Values Check,Supplier_Risk,FAIL,148,Checks if column Supplier_Risk contains null values.
 raw,Missing Values Check,Commodity_Price,PASS,0,Checks if column Commodity_Price contains null values.
 raw,Missing Values Check,Transportation_Cost,PASS,0,Checks if column Transportation_Cost contains null values.
 raw,Missing Values Check,Storage_Capacity,PASS,0,Checks if column Storage_Capacity contains null values.
 raw,Missing Values Check,Production_Capacity,PASS,0,Checks if column Production_Capacity contains null values.
 raw,Missing Values Check,Project_Budget,PASS,0,Checks if column Project_Budget contains null values.
-raw,Missing Values Check,Weather,FAIL,49,Checks if column Weather contains null values.
+raw,Missing Values Check,Weather,FAIL,148,Checks if column Weather contains null values.
 raw,Missing Values Check,Season,PASS,0,Checks if column Season contains null values.
 raw,Missing Values Check,Quantity_Required,PASS,0,Checks if column Quantity_Required contains null values.
-raw,Duplicate Records Check,ALL_COLUMNS,FAIL,60,Checks for identical rows in the dataset.
-raw,Negative Inventory Check,Current_Inventory,FAIL,19,Checks for negative values in the current inventory column.
-raw,Negative Demand Check,Quantity_Required,FAIL,18,Checks for negative values in the quantity required (demand) column.
-raw,Negative Historical Demand Check,Historical_Demand,FAIL,18,Checks for negative values in the historical demand column.
-raw,Invalid Date Formats or Range,Date,FAIL,24,Checks if date format is parseable and falls between 2020 and 2030.
-raw,Invalid Region Code,Region,FAIL,18,"Checks if region matches one of the valid codes: ['NR', 'ER', 'WR', 'SR', 'NER']"
-raw,Invalid Project Phase,Project_Phase,FAIL,18,"Checks if project phase matches: ['Planning', 'Foundation', 'Tower Erection', 'Stringing', 'Testing & Commissioning']"
+raw,Duplicate Records Check,ALL_COLUMNS,FAIL,180,Checks for identical rows in the dataset.
+raw,Negative Inventory Check,Current_Inventory,FAIL,55,Checks for negative values in the current inventory column.
+raw,Negative Demand Check,Quantity_Required,FAIL,54,Checks for negative values in the quantity required (demand) column.
+raw,Negative Historical Demand Check,Historical_Demand,FAIL,54,Checks for negative values in the historical demand column.
+raw,Invalid Date Formats or Range,Date,FAIL,72,Checks if date format is parseable and falls between 2020 and 2030.
+raw,Invalid Region Code,Region,FAIL,54,"Checks if region matches one of the valid codes: ['NR', 'ER', 'WR', 'SR', 'NER']"
+raw,Invalid Project Phase,Project_Phase,FAIL,54,"Checks if project phase matches: ['Planning', 'Foundation', 'Tower Erection', 'Stringing', 'Testing & Commissioning']"
 cleaned,Missing Values Check,Project_ID,PASS,0,Checks if column Project_ID contains null values.
 cleaned,Missing Values Check,Date,PASS,0,Checks if column Date contains null values.
 cleaned,Missing Values Check,Region,PASS,0,Checks if column Region contains null values.

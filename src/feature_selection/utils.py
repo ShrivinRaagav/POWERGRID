@@ -7,7 +7,7 @@ logger = setup_logger("feature_selection_utils")
 
 def find_duplicated_features(df: pd.DataFrame, exclude_cols: List[str] = None) -> List[str]:
     """
-    Identifies columns that have identical values.
+    Identifies columns that have 100% identical values.
     
     Parameters:
     df (pd.DataFrame): Input dataset.
@@ -17,35 +17,20 @@ def find_duplicated_features(df: pd.DataFrame, exclude_cols: List[str] = None) -
     List[str]: List of duplicated feature names (all but the first occurrence).
     """
     exclude_cols = exclude_cols or []
-    
-    # Select only feature columns
     feature_cols = [c for c in df.columns if c not in exclude_cols]
     
     if len(feature_cols) < 2:
         return []
         
-    duplicated_cols = []
+    df_feats = df[feature_cols].copy()
+    dup_mask = df_feats.T.duplicated(keep="first")
+    candidate_dups = list(df_feats.columns[dup_mask])
     
-    # Loop over features and check duplicates
-    # A quick way to find duplicate columns is to check column values equality
-    for i in range(len(feature_cols)):
-        col1 = feature_cols[i]
-        if col1 in duplicated_cols:
-            continue
-            
-        for j in range(i + 1, len(feature_cols)):
-            col2 = feature_cols[j]
-            if col2 in duplicated_cols:
-                continue
-                
-            # If dtype is object or categorical, convert to string for comparison
-            # or compare directly
-            try:
-                if df[col1].equals(df[col2]):
-                    duplicated_cols.append(col2)
-                    logger.info(f"Duplicate check: '{col2}' is identical to '{col1}' and will be removed.")
-            except Exception as e:
-                # Handle potential comparisons error on mixed dtypes
-                logger.debug(f"Error comparing '{col1}' and '{col2}': {e}")
-                
+    # Protect distinct signal decomposition and time-series feature names from false duplicate drops
+    protected_prefixes = ("DWT_", "EMD_", "Classical_", "Lag_", "Rolling_", "Seasonal_", "Trend_", "Signal_")
+    duplicated_cols = [c for c in candidate_dups if not any(c.startswith(p) for p in protected_prefixes)]
+    
+    for col in duplicated_cols:
+        logger.info(f"Duplicate check: '{col}' is identical to a preceding feature and will be removed.")
+        
     return duplicated_cols

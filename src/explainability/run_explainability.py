@@ -49,13 +49,7 @@ def run_explainability_pipeline(reports_dir: Path = REPORTS_DIR) -> Dict[str, An
     importance_df = get_ranked_shap_feature_importance(shap_exp, feature_names, save_path=csv_path)
 
     # 3. Model Predictions on Evaluated Test Set
-    if hasattr(manager.model_wrapper, "predict"):
-        y_pred = manager.model_wrapper.predict(X_test)
-        if isinstance(y_pred, dict):
-            y_pred = y_pred.get("P50", list(y_pred.values())[0])
-    else:
-        underlying = manager._extract_underlying_estimator()
-        y_pred = underlying.predict(X_test)
+    y_pred = manager._predict_array(X_test)
 
     y_pred_arr = np.asarray(y_pred).flatten()
     y_true_raw = y_test.values if hasattr(y_test, "values") else np.asarray(y_test).flatten()

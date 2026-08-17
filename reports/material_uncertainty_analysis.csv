@@ -1,0 +1,7 @@
+Material,Region,Total Samples,MAE,RMSE,PICP,Average_Interval_Width,P90_Violations,P10_Violations,Mean_Demand,Demand_Std,Coefficient_of_Variation
+Conductor,NR,1,0.0,0.0,100.0,300.0,0,0,1000.0,0.0,0.0
+Conductor,SR,1,50.0,50.0,0.0,280.0,1,0,1200.0,0.0,0.0
+Hardware Fittings,NR,1,2.0,2.0,100.0,20.0,0,0,20.0,0.0,0.0
+Hardware Fittings,SR,1,2.0,2.0,100.0,13.0,0,0,10.0,0.0,0.0
+Transformer,NR,1,20.0,20.0,100.0,150.0,0,0,500.0,0.0,0.0
+Transformer,SR,1,20.0,20.0,100.0,170.0,0,0,600.0,0.0,0.0

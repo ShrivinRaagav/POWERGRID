@@ -41,7 +41,7 @@ def split_chronological(df: pd.DataFrame, train_ratio: float = 0.7, val_ratio: f
     
     return train_df, val_df, test_df
 
-def run_training_flow(model_name: str, notes: str = ""):
+def run_training_flow(model_name: str, notes: str = "", auto_update_reports: bool = True):
     """Orchestrates the model instantiation, training, prediction, evaluation, and logging."""
     logger.info(f"Initiating training controller flow for model: '{model_name}'...")
     
@@ -125,8 +125,9 @@ def run_training_flow(model_name: str, notes: str = ""):
     
     logger.info(f"Forecasting pipeline completed successfully for run: {manager.run_id}")
     
-    # 12. Automatically update reports
-    update_reports()
+    # 12. Automatically update reports if requested
+    if auto_update_reports:
+        update_reports()
 
 def update_reports():
     """Compiles results from all runs to generate performance reports, statistical analysis, and best model selection metadata."""
@@ -161,7 +162,8 @@ def main():
         logger.info("Training ALL registered forecasting models sequentially...")
         models_to_train = [m for m in ["random_forest", "svr", "xgboost", "mlp", "lstm", "lightgbm_quantile"] if m in registered]
         for m in models_to_train:
-            run_training_flow(model_name=m, notes=args.notes)
+            run_training_flow(model_name=m, notes=args.notes, auto_update_reports=False)
+        update_reports()
         return
 
     if not args.model:

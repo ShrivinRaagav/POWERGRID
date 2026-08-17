@@ -10,8 +10,17 @@ def to_numpy_arrays(
     """Ensures y_true and y_pred are 1D numpy float64 arrays of matching lengths."""
     y_t = np.asarray(y_true, dtype=np.float64).flatten()
     y_p = np.asarray(y_pred, dtype=np.float64).flatten()
+    if len(y_t) == 0 or len(y_p) == 0:
+        raise ValueError("Input arrays must not be empty.")
     if len(y_t) != len(y_p):
         raise ValueError(f"Length mismatch: y_true length {len(y_t)} != y_pred length {len(y_p)}")
+    # Handle NaNs if present by zero-filling or dropping
+    if np.isnan(y_t).any() or np.isnan(y_p).any():
+        mask = ~(np.isnan(y_t) | np.isnan(y_p))
+        if not np.any(mask):
+            raise ValueError("All elements in y_true or y_pred are NaNs.")
+        y_t = y_t[mask]
+        y_p = y_p[mask]
     return y_t, y_p
 
 def calculate_mae(y_true: Any, y_pred: Any) -> float:
@@ -50,6 +59,8 @@ def calculate_wmape(y_true: Any, y_pred: Any) -> float:
 def calculate_r2(y_true: Any, y_pred: Any) -> float:
     """Calculates R² Coefficient of Determination."""
     y_t, y_p = to_numpy_arrays(y_true, y_pred)
+    if np.var(y_t) < 1e-8:
+        return 0.0
     return float(r2_score(y_t, y_p))
 
 def calculate_smape(y_true: Any, y_pred: Any, epsilon: float = 1e-5) -> float:
