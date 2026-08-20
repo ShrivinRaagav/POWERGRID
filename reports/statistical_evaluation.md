@@ -20,7 +20,7 @@ The **Friedman Test** evaluates whether there is a statistically significant dif
 
 | Metric | Value |
 | :--- | :--- |
-| **Friedman $\chi^2$ Statistic** | `2348.1254` |
+| **Friedman $\chi^2$ Statistic** | `2964.9730` |
 | **p-value** | `0.000000e+00` |
 | **Degrees of Freedom** | `5` |
 | **Number of Evaluated Models** | `6` |
@@ -38,21 +38,21 @@ The **Wilcoxon Signed-Rank Test** performs non-parametric pairwise comparisons o
 
 | Model A | Model B | Statistic | p-value | Significant ($lpha=0.05$) | Superior Model |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| lightgbm_quantile | lstm | 47173.00 | 3.565455e-196 | YES | lightgbm_quantile |
-| lightgbm_quantile | mlp | 274749.50 | 6.389520e-54 | YES | lightgbm_quantile |
-| lightgbm_quantile | random_forest | 417248.00 | 1.260322e-10 | YES | lightgbm_quantile |
-| lightgbm_quantile | svr | 35734.50 | 1.053538e-205 | YES | lightgbm_quantile |
-| lightgbm_quantile | xgboost | 360709.50 | 1.320023e-23 | YES | lightgbm_quantile |
-| lstm | mlp | 86194.00 | 2.218090e-165 | YES | mlp |
-| lstm | random_forest | 68174.00 | 2.849692e-179 | YES | random_forest |
-| lstm | svr | 291030.00 | 3.391947e-47 | YES | lstm |
-| lstm | xgboost | 71766.00 | 1.857402e-176 | YES | xgboost |
-| mlp | random_forest | 360356.50 | 1.052641e-23 | YES | random_forest |
-| mlp | svr | 56884.00 | 2.907160e-188 | YES | mlp |
-| mlp | xgboost | 405519.00 | 7.228427e-13 | YES | xgboost |
-| random_forest | svr | 48192.00 | 2.454493e-195 | YES | random_forest |
-| random_forest | xgboost | 454679.00 | 4.902548e-05 | YES | xgboost |
-| svr | xgboost | 51965.00 | 2.996200e-192 | YES | xgboost |
+| lightgbm_quantile | lstm | 15254.00 | 2.461209e-223 | YES | lightgbm_quantile |
+| lightgbm_quantile | mlp | 85678.00 | 9.037971e-166 | YES | lightgbm_quantile |
+| lightgbm_quantile | random_forest | 372818.00 | 2.308730e-20 | YES | lightgbm_quantile |
+| lightgbm_quantile | svr | 26834.00 | 2.818865e-213 | YES | lightgbm_quantile |
+| lightgbm_quantile | xgboost | 199931.00 | 9.541949e-91 | YES | lightgbm_quantile |
+| lstm | mlp | 125124.00 | 2.667305e-137 | YES | mlp |
+| lstm | random_forest | 64571.00 | 4.069119e-182 | YES | random_forest |
+| lstm | svr | 356656.00 | 9.517153e-25 | YES | lstm |
+| lstm | xgboost | 55285.00 | 1.486314e-189 | YES | xgboost |
+| mlp | random_forest | 207364.00 | 1.184550e-86 | YES | random_forest |
+| mlp | svr | 93247.00 | 4.256030e-160 | YES | mlp |
+| mlp | xgboost | 263441.00 | 7.301774e-59 | YES | xgboost |
+| random_forest | svr | 65857.00 | 4.242795e-181 | YES | random_forest |
+| random_forest | xgboost | 354047.00 | 1.691916e-25 | YES | random_forest |
+| svr | xgboost | 59659.00 | 4.943840e-186 | YES | xgboost |
 
 ---
 
@@ -62,12 +62,12 @@ Models are ranked strictly by **RMSE (ascending)** as the primary criterion, fol
 
 | Rank | Model | RMSE | MAE | WMAPE (%) | R² |
 | :---: | :--- | :---: | :---: | :---: | :---: |
-| 1 | lightgbm_quantile | 50.601806 | 17.837354 | 3.01% | 0.987641 |
-| 2 | xgboost | 53.818874 | 22.861951 | 3.85% | 0.986019 |
-| 3 | mlp | 56.929308 | 27.111421 | 4.57% | 0.984356 |
-| 4 | random_forest | 57.209336 | 23.356351 | 3.94% | 0.984202 |
-| 5 | lstm | 228.924052 | 146.528785 | 24.70% | 0.747041 |
-| 6 | svr | 313.886858 | 221.705513 | 37.38% | 0.524432 |
+| 1 | lightgbm_quantile | 51.574281 | 17.945315 | 3.03% | 0.987161 |
+| 2 | xgboost | 66.922507 | 36.673402 | 6.18% | 0.978382 |
+| 3 | random_forest | 74.195468 | 33.236503 | 5.60% | 0.973428 |
+| 4 | mlp | 89.483026 | 61.088810 | 10.30% | 0.961350 |
+| 5 | lstm | 233.839203 | 169.598459 | 28.59% | 0.736062 |
+| 6 | svr | 314.195321 | 227.747367 | 38.39% | 0.523497 |
 
 ---
 

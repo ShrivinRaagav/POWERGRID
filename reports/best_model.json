@@ -2,13 +2,13 @@
     "best_model": "lightgbm_quantile",
     "selection_criterion": "Lowest RMSE",
     "evaluation_metrics": {
-        "MAE": 17.837354,
-        "RMSE": 50.601806,
-        "MAPE": 12.417109,
-        "WMAPE": "3.01%",
-        "SMAPE": 14.160589,
-        "R2": 0.987641,
-        "PinballLoss": "13.858858"
+        "MAE": 17.945315,
+        "RMSE": 51.574281,
+        "MAPE": 11.943613,
+        "WMAPE": "3.03%",
+        "SMAPE": 13.000031,
+        "R2": 0.987161,
+        "PinballLoss": "15.970153"
     },
-    "generated_at": "2026-08-13T09:41:04.939860"
+    "generated_at": "2026-08-20T21:40:22.112512"
 }

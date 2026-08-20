@@ -11,7 +11,7 @@ The dataset models transmission line material logistics for POWERGRID projects. 
 
 ## 2. Number of Records
 *   **Raw Dataset Size**: 18180 rows, 22 columns.
-*   **Cleaned/Preprocessed Dataset Size**: 12590 rows, 44 columns.
+*   **Cleaned/Preprocessed Dataset Size**: 12590 rows, 53 columns.
 *   **Split Allocation**:
     *   *Training Split (70%)*: 4,199 rows
     *   *Validation Split (15%)*: 872 rows
@@ -121,6 +121,15 @@ The validation test log below shows pre-cleaning (raw stage) failures and post-c
 | cleaned | Missing Values Check | Lag_3 | **PASS** | 0 | Checks if column Lag_3 contains null values. |
 | cleaned | Missing Values Check | Rolling_Mean_3 | **PASS** | 0 | Checks if column Rolling_Mean_3 contains null values. |
 | cleaned | Missing Values Check | Rolling_Mean_6 | **PASS** | 0 | Checks if column Rolling_Mean_6 contains null values. |
+| cleaned | Missing Values Check | Rolling_Max_3 | **PASS** | 0 | Checks if column Rolling_Max_3 contains null values. |
+| cleaned | Missing Values Check | Rolling_Min_3 | **PASS** | 0 | Checks if column Rolling_Min_3 contains null values. |
+| cleaned | Missing Values Check | Rolling_STD_3 | **PASS** | 0 | Checks if column Rolling_STD_3 contains null values. |
+| cleaned | Missing Values Check | Demand_Velocity_1 | **PASS** | 0 | Checks if column Demand_Velocity_1 contains null values. |
+| cleaned | Missing Values Check | Demand_Velocity_2 | **PASS** | 0 | Checks if column Demand_Velocity_2 contains null values. |
+| cleaned | Missing Values Check | Demand_Acceleration | **PASS** | 0 | Checks if column Demand_Acceleration contains null values. |
+| cleaned | Missing Values Check | Demand_Volatility_3 | **PASS** | 0 | Checks if column Demand_Volatility_3 contains null values. |
+| cleaned | Missing Values Check | Peak_Spike_Flag | **PASS** | 0 | Checks if column Peak_Spike_Flag contains null values. |
+| cleaned | Missing Values Check | Dip_Drop_Flag | **PASS** | 0 | Checks if column Dip_Drop_Flag contains null values. |
 | cleaned | Missing Values Check | Inventory_Utilization | **PASS** | 0 | Checks if column Inventory_Utilization contains null values. |
 | cleaned | Missing Values Check | Lead_Time_Category | **PASS** | 0 | Checks if column Lead_Time_Category contains null values. |
 | cleaned | Missing Values Check | Demand_Growth | **PASS** | 0 | Checks if column Demand_Growth contains null values. |
@@ -149,6 +158,15 @@ The following statistics describe the engineered variables computed on the train
 | Lag_3 | 276.5593 | 160.0000 | 309.2987 | 0.0000 | 1077.5000 |
 | Rolling_Mean_3 | 277.9092 | 166.6667 | 300.2694 | 0.0000 | 1077.5000 |
 | Rolling_Mean_6 | 274.4063 | 166.0000 | 294.0213 | 0.0000 | 1077.5000 |
+| Rolling_Max_3 | 333.4632 | 206.0000 | 343.3980 | 0.0000 | 1077.5000 |
+| Rolling_Min_3 | 226.0838 | 133.0000 | 271.5477 | 0.0000 | 1077.5000 |
+| Rolling_STD_3 | 57.8938 | 24.2040 | 82.2543 | 0.0000 | 622.0949 |
+| Demand_Velocity_1 | 1.8876 | 0.0000 | 140.1286 | -1077.5000 | 1077.5000 |
+| Demand_Velocity_2 | 1.8556 | 0.0000 | 139.8670 | -1077.5000 | 1077.5000 |
+| Demand_Acceleration | 0.0320 | 0.0000 | 238.0325 | -1496.0000 | 2155.0000 |
+| Demand_Volatility_3 | 0.3222 | 0.2467 | 0.3363 | 0.0000 | 1.7321 |
+| Peak_Spike_Flag | 0.1643 | 0.0000 | 0.3705 | 0.0000 | 1.0000 |
+| Dip_Drop_Flag | 0.1649 | 0.0000 | 0.3711 | 0.0000 | 1.0000 |
 | Inventory_Utilization | 0.0847 | 0.0433 | 0.1026 | 0.0000 | 0.5303 |
 | Lead_Time_Category | 0.8276 | 1.0000 | 0.7393 | 0.0000 | 2.0000 |
 | Demand_Growth | 0.1257 | 0.0000 | 0.6219 | -0.9991 | 2.0000 |

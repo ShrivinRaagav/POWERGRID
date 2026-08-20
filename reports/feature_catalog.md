@@ -13,7 +13,7 @@ This catalog documents every feature column generated during the preprocessing (
 | **Classical_Seasonal** | Additive periodic seasonal component extracted from demand signal. | `Average of seasonal detrended signals` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **Classical_Trend** | Low-frequency trend component extracted from demand signal. | `Moving Average filter (statsmodels)` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **Commodity_Price** | Market raw material price index. | `Market Index` | Raw Data | Module 1 | ❌ No (Dropped) |
-| **Current_Inventory** | Currently available stock level at the warehouse. | `Stock count` | Raw Data | Module 1 | ❌ No (Dropped) |
+| **Current_Inventory** | Currently available stock level at the warehouse. | `Stock count` | Raw Data | Module 1 | ✔ Yes |
 | **DWT_Approximation_Energy_Ratio** | Statistical signal feature representing dwt approximation energy ratio of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ✔ Yes |
 | **DWT_Detail_Energy_Ratio** | Statistical signal feature representing dwt detail energy ratio of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **DWT_cA_Energy** | Energy (sum of squares) of approximation coefficients cA. | `DWT Low-Pass Filter` | Quantity_Required | Module 2 | ❌ No (Dropped) |
@@ -29,7 +29,7 @@ This catalog documents every feature column generated during the preprocessing (
 | **DWT_cD_2_Energy** | Sum of squares (energy) of detail wavelet coefficients at level 2. | `Discrete Wavelet Transform Filter (Level 2)` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **DWT_cD_2_Entropy** | Shannon entropy of detail wavelet coefficients at level 2. | `Discrete Wavelet Transform Filter (Level 2)` | Quantity_Required | Module 2 | ✔ Yes |
 | **DWT_cD_2_Mean** | Detail wavelet coefficients at level 2. | `Discrete Wavelet Transform Filter (Level 2)` | Quantity_Required | Module 2 | ✔ Yes |
-| **DWT_cD_2_Std** | Detail wavelet coefficients at level 2. | `Discrete Wavelet Transform Filter (Level 2)` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **DWT_cD_2_Std** | Detail wavelet coefficients at level 2. | `Discrete Wavelet Transform Filter (Level 2)` | Quantity_Required | Module 2 | ✔ Yes |
 | **DWT_cD_2_Var** | Detail wavelet coefficients at level 2. | `Discrete Wavelet Transform Filter (Level 2)` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **DWT_cD_3_Energy** | Sum of squares (energy) of detail wavelet coefficients at level 3. | `Discrete Wavelet Transform Filter (Level 3)` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **DWT_cD_3_Entropy** | Shannon entropy of detail wavelet coefficients at level 3. | `Discrete Wavelet Transform Filter (Level 3)` | Quantity_Required | Module 2 | ✔ Yes |
@@ -38,15 +38,20 @@ This catalog documents every feature column generated during the preprocessing (
 | **DWT_cD_3_Var** | Detail wavelet coefficients at level 3. | `Discrete Wavelet Transform Filter (Level 3)` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **Date** | Weekly timestamp of the record. | `ISO-8601 Date` | Raw Data | Module 1 | ✔ Yes |
 | **DayOfWeek** | Day index of the week (0 to 6) from Date. | `dt.dayofweek` | Date Column | Module 1 | ❌ No (Dropped) |
+| **Demand_Acceleration** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
 | **Demand_Growth** | Demand growth speed relative to rolling average. | `(Lag_1 - Rolling_Mean_3) / (Rolling_Mean_3 + epsilon)` | Quantity_Required | Module 1 | ❌ No (Dropped) |
+| **Demand_Velocity_1** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
+| **Demand_Velocity_2** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
+| **Demand_Volatility_3** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
+| **Dip_Drop_Flag** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
 | **Dominant_Frequency** | Statistical signal feature representing dominant frequency of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **Dominant_IMF** | Statistical signal feature representing dominant imf of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_1** | Intrinsic Mode Function (IMF) #1 representing oscillatory mode of demand variation. | `EMD Sifting Mode #1` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **EMD_IMF_1** | Intrinsic Mode Function (IMF) #1 representing oscillatory mode of demand variation. | `EMD Sifting Mode #1` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_1_Energy** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_1_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **EMD_IMF_1_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_1_Std** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_1_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_2** | Intrinsic Mode Function (IMF) #2 representing oscillatory mode of demand variation. | `EMD Sifting Mode #2` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **EMD_IMF_2** | Intrinsic Mode Function (IMF) #2 representing oscillatory mode of demand variation. | `EMD Sifting Mode #2` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_2_Energy** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_2_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_2_Std** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
@@ -55,17 +60,17 @@ This catalog documents every feature column generated during the preprocessing (
 | **EMD_IMF_3_Energy** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_3_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_3_Std** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_3_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
+| **EMD_IMF_3_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_4** | Intrinsic Mode Function (IMF) #4 representing oscillatory mode of demand variation. | `EMD Sifting Mode #4` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_4_Energy** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_4_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_4_Std** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_4_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_5** | Intrinsic Mode Function (IMF) #5 representing oscillatory mode of demand variation. | `EMD Sifting Mode #5` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **EMD_IMF_4_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
+| **EMD_IMF_5** | Intrinsic Mode Function (IMF) #5 representing oscillatory mode of demand variation. | `EMD Sifting Mode #5` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_5_Energy** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_5_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
 | **EMD_IMF_5_Std** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **EMD_IMF_5_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ✔ Yes |
+| **EMD_IMF_5_Var** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_6** | Intrinsic Mode Function (IMF) #6 representing oscillatory mode of demand variation. | `EMD Sifting Mode #6` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_6_Energy** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **EMD_IMF_6_Mean** | Intrinsic Mode Function (IMF) #? representing oscillatory mode of demand variation. | `EMD Sifting Mode #?` | Quantity_Required | Module 2 | ❌ No (Dropped) |
@@ -85,25 +90,29 @@ This catalog documents every feature column generated during the preprocessing (
 | **Lag_2** | Two-period historical lag of target Quantity_Required. | `Shift(2) grouped by Warehouse & Material` | Quantity_Required | Module 1 | ❌ No (Dropped) |
 | **Lag_3** | Three-period historical lag of target Quantity_Required. | `Shift(3) grouped by Warehouse & Material` | Quantity_Required | Module 1 | ❌ No (Dropped) |
 | **Lead_Time_Category** | Categorized lead time duration index (0: Short, 1: Medium, 2: Long). | `Cut(Lead_Time_Days, Bins)` | Lead_Time_Days | Module 1 | ❌ No (Dropped) |
-| **Lead_Time_Days** | Supply duration in days from order to delivery. | `Duration` | Raw Data | Module 1 | ❌ No (Dropped) |
+| **Lead_Time_Days** | Supply duration in days from order to delivery. | `Duration` | Raw Data | Module 1 | ✔ Yes |
 | **Material_Type** | Material category (e.g. Conductor, Insulator, Tower Member). | `Categorical` | Raw Data | Module 1 | ✔ Yes |
 | **Month** | Calendar month index (1 to 12) from Date. | `dt.month` | Date Column | Module 1 | ❌ No (Dropped) |
 | **Month_Cos** | Cosine transformation of month index for cyclical mapping. | `cos(2 * pi * Month / 12)` | Date Column | Module 1 | ❌ No (Dropped) |
 | **Month_Sin** | Sine transformation of month index for cyclical mapping. | `sin(2 * pi * Month / 12)` | Date Column | Module 1 | ❌ No (Dropped) |
 | **Num_IMFs** | Statistical signal feature representing num imfs of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **Peak_Spike_Flag** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
 | **Production_Capacity** | Supplier manufacturing capacity limit. | `Capacity limit` | Raw Data | Module 1 | ✔ Yes |
 | **Project_Budget** | Remaining financial budget allocation for the project. | `Financial Amount` | Raw Data | Module 1 | ❌ No (Dropped) |
 | **Project_ID** | Unique identifier for the transmission line project. | `Categorical Identifier` | Raw Data | Module 1 | ✔ Yes |
-| **Project_Phase** | Current phase of project construction. | `Categorical` | Raw Data | Module 1 | ❌ No (Dropped) |
+| **Project_Phase** | Current phase of project construction. | `Categorical` | Raw Data | Module 1 | ✔ Yes |
 | **Quantity_Required** | Target variable: actual material demand requested. | `Demand quantity` | Raw Data | Module 1 | ✔ Yes |
 | **Region** | Geographical region code (e.g. NR, ER, WR, SR, NER). | `Categorical` | Raw Data | Module 1 | ✔ Yes |
 | **Residual_Mean** | Statistical signal feature representing residual mean of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
-| **Residual_Std** | Statistical signal feature representing residual std of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ✔ Yes |
+| **Residual_Std** | Statistical signal feature representing residual std of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **Residual_Variance** | Statistical signal feature representing residual variance of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
+| **Rolling_Max_3** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
 | **Rolling_Mean_3** | 3-week rolling average demand shift-1 lag sequence. | `RollingMean(3) of Lag_1` | Quantity_Required | Module 1 | ❌ No (Dropped) |
 | **Rolling_Mean_6** | 6-week rolling average demand shift-1 lag sequence. | `RollingMean(6) of Lag_1` | Quantity_Required | Module 1 | ❌ No (Dropped) |
+| **Rolling_Min_3** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ❌ No (Dropped) |
+| **Rolling_STD_3** | Engineered pipeline input feature. | `N/A` | Computed | Module 1 | ✔ Yes |
 | **Season** | Climatic season (Summer, Monsoon, Winter, etc.). | `Categorical` | Raw Data | Module 1 | ❌ No (Dropped) |
-| **Seasonal_Demand_Index** | Mean demand index of material in season relative to overall average. | `Mean(Material_Season) / Mean(Material_Overall)` | Material_Type, Season, Target | Module 1 | ❌ No (Dropped) |
+| **Seasonal_Demand_Index** | Mean demand index of material in season relative to overall average. | `Mean(Material_Season) / Mean(Material_Overall)` | Material_Type, Season, Target | Module 1 | ✔ Yes |
 | **Seasonality_Strength** | Statistical signal feature representing seasonality strength of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ✔ Yes |
 | **Signal_Energy** | Statistical signal feature representing signal energy of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ❌ No (Dropped) |
 | **Signal_Entropy** | Statistical signal feature representing signal entropy of the demand curve. | `Signal Analysis Statistic` | Quantity_Required | Module 2 | ✔ Yes |

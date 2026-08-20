@@ -99,7 +99,7 @@ feature_selection:
   variance_threshold: 0.0001
   correlation_threshold: 0.85
   importance_method: "mutual_info"  # "mutual_info" or "random_forest"
-  top_k_features: 20
+  top_k_features: 28
   keep_columns:
     - "Date"
     - "Project_ID"

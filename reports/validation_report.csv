@@ -64,6 +64,15 @@ cleaned,Missing Values Check,Lag_2,PASS,0,Checks if column Lag_2 contains null v
 cleaned,Missing Values Check,Lag_3,PASS,0,Checks if column Lag_3 contains null values.
 cleaned,Missing Values Check,Rolling_Mean_3,PASS,0,Checks if column Rolling_Mean_3 contains null values.
 cleaned,Missing Values Check,Rolling_Mean_6,PASS,0,Checks if column Rolling_Mean_6 contains null values.
+cleaned,Missing Values Check,Rolling_Max_3,PASS,0,Checks if column Rolling_Max_3 contains null values.
+cleaned,Missing Values Check,Rolling_Min_3,PASS,0,Checks if column Rolling_Min_3 contains null values.
+cleaned,Missing Values Check,Rolling_STD_3,PASS,0,Checks if column Rolling_STD_3 contains null values.
+cleaned,Missing Values Check,Demand_Velocity_1,PASS,0,Checks if column Demand_Velocity_1 contains null values.
+cleaned,Missing Values Check,Demand_Velocity_2,PASS,0,Checks if column Demand_Velocity_2 contains null values.
+cleaned,Missing Values Check,Demand_Acceleration,PASS,0,Checks if column Demand_Acceleration contains null values.
+cleaned,Missing Values Check,Demand_Volatility_3,PASS,0,Checks if column Demand_Volatility_3 contains null values.
+cleaned,Missing Values Check,Peak_Spike_Flag,PASS,0,Checks if column Peak_Spike_Flag contains null values.
+cleaned,Missing Values Check,Dip_Drop_Flag,PASS,0,Checks if column Dip_Drop_Flag contains null values.
 cleaned,Missing Values Check,Inventory_Utilization,PASS,0,Checks if column Inventory_Utilization contains null values.
 cleaned,Missing Values Check,Lead_Time_Category,PASS,0,Checks if column Lead_Time_Category contains null values.
 cleaned,Missing Values Check,Demand_Growth,PASS,0,Checks if column Demand_Growth contains null values.

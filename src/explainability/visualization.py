@@ -225,11 +225,13 @@ def generate_all_shap_plots(
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. SHAP Summary Plot
+    # 1. SHAP Summary (Beeswarm) Plot
     plot_shap_summary(shap_matrix, X_test, output_dir / "shap_summary.png", dpi=dpi)
+    plot_shap_summary(shap_matrix, X_test, output_dir / "shap_beeswarm.png", dpi=dpi)
 
     # 2. SHAP Feature Importance Bar Plot
     plot_shap_bar(importance_df, output_dir / "shap_bar.png", dpi=dpi)
+    plot_shap_bar(importance_df, output_dir / "shap_feature_importance.png", dpi=dpi)
 
     # 3. Local Waterfall Plots (Highest, Median, Lowest)
     for scenario_name in ["highest", "median", "lowest"]:

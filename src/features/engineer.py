@@ -77,20 +77,41 @@ class FeatureEngineer:
         df_out["Lag_2"] = df_out.groupby(group_cols)[TARGET_COL].shift(2)
         df_out["Lag_3"] = df_out.groupby(group_cols)[TARGET_COL].shift(3)
         
-        # Rolling averages (on shift(1) to avoid leakage)
+        # Rolling averages & extremes (on shift(1) to avoid leakage)
         df_out["Rolling_Mean_3"] = df_out.groupby(group_cols)["Lag_1"].transform(
             lambda x: x.rolling(window=3, min_periods=1).mean()
         )
         df_out["Rolling_Mean_6"] = df_out.groupby(group_cols)["Lag_1"].transform(
             lambda x: x.rolling(window=6, min_periods=1).mean()
         )
+        df_out["Rolling_Max_3"] = df_out.groupby(group_cols)["Lag_1"].transform(
+            lambda x: x.rolling(window=3, min_periods=1).max()
+        )
+        df_out["Rolling_Min_3"] = df_out.groupby(group_cols)["Lag_1"].transform(
+            lambda x: x.rolling(window=3, min_periods=1).min()
+        )
+        df_out["Rolling_STD_3"] = df_out.groupby(group_cols)["Lag_1"].transform(
+            lambda x: x.rolling(window=3, min_periods=1).std()
+        ).fillna(0.0)
         
         # Impute NaNs created by shifting/rolling with the material median or global median
-        for col in ["Lag_1", "Lag_2", "Lag_3", "Rolling_Mean_3", "Rolling_Mean_6"]:
+        for col in ["Lag_1", "Lag_2", "Lag_3", "Rolling_Mean_3", "Rolling_Mean_6", "Rolling_Max_3", "Rolling_Min_3", "Rolling_STD_3"]:
             # Fill with global median demand if still missing
             df_out[col] = df_out[col].fillna(self.global_median_demand)
             
-        # --- 2. Domain Engineered Features ---
+        # --- 2. High-Frequency Momentum, Velocity & Volatility Features ---
+        # Rate of demand change (velocity)
+        df_out["Demand_Velocity_1"] = df_out["Lag_1"] - df_out["Lag_2"]
+        df_out["Demand_Velocity_2"] = df_out["Lag_2"] - df_out["Lag_3"]
+        # Second derivative (acceleration / momentum shift)
+        df_out["Demand_Acceleration"] = df_out["Demand_Velocity_1"] - df_out["Demand_Velocity_2"]
+        # Rolling coefficient of variation (volatility ratio)
+        df_out["Demand_Volatility_3"] = df_out["Rolling_STD_3"] / (df_out["Rolling_Mean_3"] + 1e-5)
+        # Leading Peak/Dip indicator triggers
+        df_out["Peak_Spike_Flag"] = (df_out["Lag_1"] > (df_out["Rolling_Mean_3"] * 1.25)).astype(np.float32)
+        df_out["Dip_Drop_Flag"] = (df_out["Lag_1"] < (df_out["Rolling_Mean_3"] * 0.75)).astype(np.float32)
+
+        # --- 3. Domain Engineered Features ---
         
         # Inventory Utilization
         df_out["Inventory_Utilization"] = df_out["Current_Inventory"] / (df_out["Storage_Capacity"] + 1e-5)
@@ -138,6 +159,9 @@ def generate_feature_summary(df: pd.DataFrame) -> pd.DataFrame:
     """
     engineered_cols = [
         "Lag_1", "Lag_2", "Lag_3", "Rolling_Mean_3", "Rolling_Mean_6",
+        "Rolling_Max_3", "Rolling_Min_3", "Rolling_STD_3",
+        "Demand_Velocity_1", "Demand_Velocity_2", "Demand_Acceleration",
+        "Demand_Volatility_3", "Peak_Spike_Flag", "Dip_Drop_Flag",
         "Inventory_Utilization", "Lead_Time_Category", "Demand_Growth",
         "Inventory_Coverage", "Budget_Utilization", "Supplier_Risk_Score",
         "Seasonal_Demand_Index", "Transportation_Cost_Index"

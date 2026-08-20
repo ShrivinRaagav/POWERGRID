@@ -42,6 +42,15 @@ This document details all columns in the processed datasets (`train_dataset.csv`
 | **Lag_3** | `float64` | Demand of material from 3 weeks ago. | >= 0 | 160.0000 | Autoregressive forecasting inputs. |
 | **Rolling_Mean_3** | `float64` | Rolling average demand of last 3 weeks. | >= 0 | 160.0000 | Moving average forecasting smoothing. |
 | **Rolling_Mean_6** | `float64` | Rolling average demand of last 6 weeks. | >= 0 | 160.0000 | Moving average forecasting smoothing. |
+| **Rolling_Max_3** | `float64` | Engineered model variable. | Numeric | 160.0000 | ML Regression Input |
+| **Rolling_Min_3** | `float64` | Engineered model variable. | Numeric | 160.0000 | ML Regression Input |
+| **Rolling_STD_3** | `float64` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
+| **Demand_Velocity_1** | `float64` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
+| **Demand_Velocity_2** | `float64` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
+| **Demand_Acceleration** | `float64` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
+| **Demand_Volatility_3** | `float64` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
+| **Peak_Spike_Flag** | `float32` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
+| **Dip_Drop_Flag** | `float32` | Engineered model variable. | Numeric | 0.0000 | ML Regression Input |
 | **Inventory_Utilization** | `float64` | Warehouse capacity utilization rate. | 0.0 to 1.0 | 0.2316 | Logistics bottlenecks and storage allocation planning. |
 | **Lead_Time_Category** | `int32` | Binned lead time intervals. | 0 (Short), 1 (Medium), 2 (Long) | 0 | Decision parameters for inventory replenishment trigger. |
 | **Demand_Growth** | `float64` | Relative change rate between Lag_1 and Lag_2. | -inf to inf | 0.0000 | Trend indicator for gradient boosting regressors. |

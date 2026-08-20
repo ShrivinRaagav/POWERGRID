@@ -1,4 +1,5 @@
 import json
+import os
 import joblib
 import numpy as np
 import pandas as pd
@@ -10,13 +11,13 @@ from src.config.settings import (
     PROCESSED_DATASET_PATH, EXPERIMENTS_DIR, REPORTS_DIR, DATE_COL, TARGET_COL
 )
 from src.utils.helpers import setup_logger
+from src.models import registry
+from src.models import lightgbm_quantile, xgboost_model, random_forest, mlp, lstm, svr
 
 logger = setup_logger("shap_explainer")
 
 def get_best_model_info(reports_dir: Path = REPORTS_DIR) -> Dict[str, Any]:
-    """
-    Loads best model metadata from reports/best_model.json.
-    """
+    """Loads best model metadata from reports/best_model.json."""
     json_path = reports_dir / "best_model.json"
     if not json_path.exists():
         raise FileNotFoundError(f"best_model.json not found at {json_path}. Run model training first.")
@@ -29,7 +30,8 @@ def get_best_model_info(reports_dir: Path = REPORTS_DIR) -> Dict[str, Any]:
 
 def load_best_model_checkpoint(best_model_name: str, experiments_dir: Path = EXPERIMENTS_DIR) -> Tuple[Any, Path]:
     """
-    Locates and loads the latest trained model checkpoint for the given model name.
+    Locates and instantiates the trained model object using the model registry,
+    then loads the serialized weights/state.
     """
     checkpoints_root = experiments_dir / "checkpoints"
     if not checkpoints_root.exists():
@@ -39,21 +41,26 @@ def load_best_model_checkpoint(best_model_name: str, experiments_dir: Path = EXP
     if not matching_dirs:
         raise FileNotFoundError(f"No checkpoint directories found for model '{best_model_name}' in {checkpoints_root}")
 
-    # Sort by modification time to get latest run
     matching_dirs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     latest_dir = matching_dirs[0]
 
     model_file = latest_dir / "model.joblib"
     if not model_file.exists():
-        # Fallback to any joblib file in directory
         joblibs = list(latest_dir.glob("*.joblib"))
         if not joblibs:
             raise FileNotFoundError(f"No .joblib checkpoint found in {latest_dir}")
         model_file = joblibs[0]
 
-    model_obj = joblib.load(model_file)
-    logger.info(f"Successfully loaded trained model '{best_model_name}' from {model_file}")
-    return model_obj, model_file
+    try:
+        model_cls = registry.get_model_class(best_model_name)
+        model_instance = model_cls()
+        model_instance.load(str(model_file))
+        logger.info(f"Successfully loaded model '{best_model_name}' via registry from {model_file}")
+        return model_instance, model_file
+    except Exception as e:
+        logger.warning(f"Registry load fallback ({e}). Loading raw joblib artifact...")
+        raw_obj = joblib.load(model_file)
+        return raw_obj, model_file
 
 def load_processed_test_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, List[str]]:
     """
@@ -65,7 +72,6 @@ def load_processed_test_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, L
 
     df = pd.read_csv(PROCESSED_DATASET_PATH)
 
-    # Sort chronologically
     if DATE_COL in df.columns:
         df[DATE_COL] = pd.to_datetime(df[DATE_COL], errors="coerce")
         df = df.sort_values(by=DATE_COL).reset_index(drop=True)
@@ -97,69 +103,73 @@ def load_processed_test_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, L
 
 class SHAPExplainerManager:
     """
-    Manages automatic SHAP explainer selection, computation, and caching for the best model.
+    Manages automatic SHAP explainer selection, rigorous feature alignment,
+    diagnostic verification, and additivity checks for the best model.
     """
     def __init__(self, reports_dir: Path = REPORTS_DIR, experiments_dir: Path = EXPERIMENTS_DIR):
         self.reports_dir = Path(reports_dir)
         self.experiments_dir = Path(experiments_dir)
 
         self.best_meta = get_best_model_info(self.reports_dir)
-        self.best_model_name = str(self.best_meta.get("best_model", "xgboost")).lower()
+        self.best_model_name = str(self.best_meta.get("best_model", "lightgbm_quantile")).lower()
 
         self.model_wrapper, self.checkpoint_path = load_best_model_checkpoint(self.best_model_name, self.experiments_dir)
-        self.X_test, self.y_test, self.X_train, self.feature_names = load_processed_test_data()
+        self.X_test_raw, self.y_test, self.X_train_raw, self.raw_feature_names = load_processed_test_data()
 
-        # Align feature columns if checkpoint metadata specifies feature_cols
-        if isinstance(self.model_wrapper, dict) and "feature_cols" in self.model_wrapper:
-            ckpt_features = self.model_wrapper["feature_cols"]
-            common_feats = [c for c in ckpt_features if c in self.X_test.columns]
-            if len(common_feats) == len(ckpt_features):
-                self.feature_names = ckpt_features
-                self.X_test = self.X_test[self.feature_names]
-                self.X_train = self.X_train[self.feature_names]
+        # Extract underlying fitted estimator
+        self.estimator = self._extract_underlying_estimator()
+
+        # Align feature columns to training configuration
+        if hasattr(self.model_wrapper, "feature_cols") and self.model_wrapper.feature_cols is not None:
+            self.feature_names = list(self.model_wrapper.feature_cols)
+        elif hasattr(self.estimator, "feature_name_") and self.estimator.feature_name_ is not None:
+            self.feature_names = list(self.estimator.feature_name_)
+        elif hasattr(self.estimator, "feature_names_in_") and self.estimator.feature_names_in_ is not None:
+            self.feature_names = list(self.estimator.feature_names_in_)
+        else:
+            self.feature_names = self.raw_feature_names
+
+        # Extract imputation values from model if available
+        if hasattr(self.model_wrapper, "impute_values") and self.model_wrapper.impute_values is not None:
+            self.impute_values = self.model_wrapper.impute_values
+        else:
+            self.impute_values = self.X_train_raw.median().fillna(0.0)
+
+        # Align test and train DataFrames
+        self.X_test = self.X_test_raw.reindex(columns=self.feature_names).fillna(self.impute_values)
+        self.X_train = self.X_train_raw.reindex(columns=self.feature_names).fillna(self.impute_values)
 
         self.explainer = None
         self.shap_values = None
         self.shap_matrix: Optional[np.ndarray] = None
-    def _extract_underlying_estimator(self) -> Any:
-        """Extracts the underlying fitted scikit-learn / XGBoost / LightGBM estimator object."""
-        m = self.model_wrapper
-        if isinstance(m, list):
-            m = m[1] if len(m) > 1 else m[0]
+        self.expected_value: float = 0.0
 
-        if isinstance(m, dict):
-            if "P50" in m:
-                m = m["P50"]
-            elif "model" in m and m["model"] is not None:
-                m = m["model"]
-            elif "models" in m and isinstance(m["models"], dict):
-                models_dict = m["models"]
-                if "P50" in models_dict:
-                    m = models_dict["P50"]
-                elif 0.5 in models_dict:
-                    m = models_dict[0.5]
-                else:
-                    m = list(models_dict.values())[0]
-            elif "estimator" in m and m["estimator"] is not None:
-                m = m["estimator"]
-            elif len(m) > 0:
-                m = list(m.values())[0]
+    def _extract_underlying_estimator(self) -> Any:
+        """Extracts the underlying fitted estimator object (e.g. LGBMRegressor, XGBRegressor)."""
+        m = self.model_wrapper
+
+        # LightGBM Quantile Forecast Model
+        if hasattr(m, "models") and isinstance(m.models, dict):
+            if 0.5 in m.models:
+                logger.info("Selected LightGBM P50 (median) quantile model for SHAP explanations.")
+                return m.models[0.5]
+            elif "P50" in m.models:
+                return m.models["P50"]
+            else:
+                return list(m.models.values())[0]
 
         if hasattr(m, "model") and m.model is not None:
-            m = m.model
-        if hasattr(m, "models") and m.models is not None:
-            if isinstance(m.models, dict):
-                if "P50" in m.models:
-                    m = m.models["P50"]
-                elif 0.5 in m.models:
-                    m = m.models[0.5]
-                else:
-                    m = list(m.models.values())[0]
-            elif isinstance(m.models, list):
-                m = m.models[1] if len(m.models) > 1 else m.models[0]
+            return m.model
 
-        if isinstance(m, list):
-            m = m[1] if len(m) > 1 else m[0]
+        if isinstance(m, dict):
+            if 0.5 in m:
+                return m[0.5]
+            if "P50" in m:
+                return m["P50"]
+            if "model" in m and m["model"] is not None:
+                return m["model"]
+            if "models" in m and isinstance(m["models"], dict):
+                return m["models"].get(0.5, m["models"].get("P50", list(m["models"].values())[0]))
 
         return m
 
@@ -168,66 +178,103 @@ class SHAPExplainerManager:
         if isinstance(X_input, np.ndarray):
             df_in = pd.DataFrame(X_input, columns=self.feature_names)
         elif isinstance(X_input, pd.DataFrame):
-            df_in = X_input
+            df_in = X_input.reindex(columns=self.feature_names).fillna(self.impute_values)
         else:
-            df_in = pd.DataFrame(X_input)
+            df_in = pd.DataFrame(X_input).reindex(columns=self.feature_names).fillna(self.impute_values)
 
-        if hasattr(self.model_wrapper, "predict"):
+        if hasattr(self.estimator, "predict"):
+            preds = self.estimator.predict(df_in)
+        elif hasattr(self.model_wrapper, "predict"):
             preds = self.model_wrapper.predict(df_in)
         else:
-            estimator = self._extract_underlying_estimator()
-            if hasattr(estimator, "predict"):
-                preds = estimator.predict(df_in)
-            else:
-                preds = np.zeros(len(df_in))
+            preds = np.zeros(len(df_in))
 
         if isinstance(preds, dict):
-            preds = preds.get("P50", list(preds.values())[0])
+            preds = preds.get("P50", preds.get(0.5, list(preds.values())[0]))
 
         return np.asarray(preds, dtype=np.float64).flatten()
 
     def initialize_explainer(self):
         """Initializes TreeExplainer or KernelExplainer based on model architecture."""
-        estimator = self._extract_underlying_estimator()
         predict_fn = lambda x: self._predict_array(x)
 
         tree_models = ["xgboost", "random_forest", "lightgbm_quantile", "lightgbm"]
         is_tree = any(tm in self.best_model_name for tm in tree_models)
 
-        if is_tree:
-            logger.info(f"Initializing TreeExplainer for tree-based model: '{self.best_model_name}'")
+        if is_tree and hasattr(self.estimator, "predict"):
+            logger.info(f"Initializing TreeExplainer for tree-based model: '{self.best_model_name}' ({type(self.estimator).__name__})")
             try:
-                # Direct TreeExplainer call on underlying scikit-learn / XGBoost estimator
-                self.explainer = shap.TreeExplainer(estimator)
+                self.explainer = shap.TreeExplainer(self.estimator)
             except Exception as e1:
                 try:
-                    booster = getattr(estimator, "get_booster", lambda: None)()
+                    booster = getattr(self.estimator, "get_booster", lambda: getattr(self.estimator, "booster_", None))()
                     if booster is not None:
                         self.explainer = shap.TreeExplainer(booster)
                     else:
                         raise e1
                 except Exception as e2:
-                    logger.warning(f"TreeExplainer failed ({e2}), falling back to KernelExplainer...")
-                    bg_sample = shap.sample(self.X_train, min(20, len(self.X_train)))
+                    logger.warning(f"TreeExplainer initialization fallback ({e2}). Using KernelExplainer...")
+                    bg_sample = shap.sample(self.X_train, min(50, len(self.X_train)))
                     self.explainer = shap.KernelExplainer(predict_fn, bg_sample)
         else:
             logger.info(f"Initializing KernelExplainer for model: '{self.best_model_name}'")
-            bg_sample = shap.sample(self.X_train, min(20, len(self.X_train)))
+            bg_sample = shap.sample(self.X_train, min(50, len(self.X_train)))
             self.explainer = shap.KernelExplainer(predict_fn, bg_sample)
 
+    def print_diagnostics(self, target_test: pd.DataFrame):
+        """Prints comprehensive diagnostic information as required."""
+        preds = self._predict_array(target_test)
+        vals = self.shap_matrix
+
+        print("\n" + "=" * 65)
+        print("SHAP EXPLAINABILITY DIAGNOSTIC REPORT")
+        print("=" * 65)
+        print(f"  Model Type:              {self.best_model_name} ({type(self.estimator).__name__})")
+        print(f"  X_train Shape:           {self.X_train.shape}")
+        print(f"  X_test Shape:            {target_test.shape}")
+        print(f"  Number of Features:      {len(self.feature_names)}")
+        print(f"  Feature Names:           {self.feature_names}")
+        print(f"  Prediction Range:        Min = {preds.min():.2f}, Max = {preds.max():.2f}, Mean = {preds.mean():.2f}")
+        print(f"  SHAP Array Shape:        {vals.shape}")
+        print(f"  Minimum SHAP Value:      {vals.min():.4f}")
+        print(f"  Maximum SHAP Value:      {vals.max():.4f}")
+        print(f"  Explainer Base Value:    {self.expected_value:.4f}")
+
+        # Verification of Additivity: sum(SHAP) + expected_value ≈ prediction
+        shap_sums = vals.sum(axis=1) + self.expected_value
+        diffs = np.abs(preds - shap_sums)
+        max_diff = np.max(diffs)
+        mean_diff = np.mean(diffs)
+        print(f"\n  Additivity Verification (sum(SHAP) + base ~= prediction):")
+        print(f"    Max Absolute Discrepancy: {max_diff:.2e}")
+        print(f"    Mean Absolute Discrepancy: {mean_diff:.2e}")
+        print(f"    Sample 0: Pred={preds[0]:.2f}, SHAP Sum + Base={shap_sums[0]:.2f} (Diff: {diffs[0]:.2e})")
+        print(f"    Status: {'PASSED (Mathematically Exact)' if max_diff < 1e-3 else 'WARNING'}")
+
+        # Mean absolute SHAP value for every feature
+        mean_abs_shaps = np.mean(np.abs(vals), axis=0)
+        sorted_indices = np.argsort(mean_abs_shaps)[::-1]
+        
+        print("\n  Ranked Top 15 Most Important Features (|mean SHAP|):")
+        for rank, idx in enumerate(sorted_indices[:15], 1):
+            feat = self.feature_names[idx]
+            score = mean_abs_shaps[idx]
+            print(f"    {rank:2d}. {feat:<28} | Mean |SHAP| = {score:.4f}")
+        print("=" * 65 + "\n")
+
     def compute_shap_values(self) -> shap.Explanation:
-        """Computes SHAP values on X_test dataset."""
+        """Computes mathematically valid SHAP values on X_test dataset."""
         if self.explainer is None:
             self.initialize_explainer()
 
-        logger.info(f"Computing SHAP values on X_test (samples={len(self.X_test)})...")
+        target_test = self.X_test
+        logger.info(f"Computing SHAP values on test dataset (samples={len(target_test)})...")
 
         if isinstance(self.explainer, shap.KernelExplainer):
-            eval_test = self.X_test.iloc[:min(100, len(self.X_test))]
+            eval_test = target_test.iloc[:min(100, len(target_test))]
             raw_shap = self.explainer.shap_values(eval_test, nsamples=50)
             target_test = eval_test
         else:
-            target_test = self.X_test
             try:
                 raw_shap = self.explainer(target_test)
             except Exception:
@@ -235,12 +282,19 @@ class SHAPExplainerManager:
 
         self.target_test = target_test
 
-        # Convert to standard Explanation object if numpy array returned
-        if isinstance(raw_shap, np.ndarray):
+        if isinstance(raw_shap, shap.Explanation):
+            self.shap_values = raw_shap
+            self.shap_matrix = np.asarray(raw_shap.values)
+            exp_v = getattr(raw_shap, "base_values", 0.0)
+            if isinstance(exp_v, (np.ndarray, list)):
+                self.expected_value = float(np.mean(exp_v))
+            else:
+                self.expected_value = float(exp_v)
+        elif isinstance(raw_shap, np.ndarray):
             self.shap_matrix = raw_shap
             exp_val = getattr(self.explainer, "expected_value", 0.0)
-            if isinstance(exp_val, np.ndarray):
-                exp_val = float(exp_val.flatten()[0])
+            if isinstance(exp_val, (list, np.ndarray)):
+                exp_val = float(exp_val[0])
             self.expected_value = float(exp_val)
             
             self.shap_values = shap.Explanation(
@@ -250,8 +304,7 @@ class SHAPExplainerManager:
                 feature_names=self.feature_names
             )
         elif isinstance(raw_shap, list):
-            # Multi-output / quantile list handling
-            self.shap_matrix = raw_shap[0]
+            self.shap_matrix = raw_shap[0] if len(raw_shap) > 0 else np.array([])
             exp_val = getattr(self.explainer, "expected_value", 0.0)
             if isinstance(exp_val, (list, np.ndarray)):
                 exp_val = float(exp_val[0])
@@ -263,14 +316,9 @@ class SHAPExplainerManager:
                 data=target_test.values,
                 feature_names=self.feature_names
             )
-        else:
-            self.shap_values = raw_shap
-            self.shap_matrix = getattr(raw_shap, "values", np.array([]))
-            exp_v = getattr(raw_shap, "base_values", 0.0)
-            if isinstance(exp_v, (np.ndarray, list)):
-                self.expected_value = float(np.mean(exp_v))
-            else:
-                self.expected_value = float(exp_v)
+
+        # Print diagnostics
+        self.print_diagnostics(target_test)
 
         logger.info(f"SHAP value computation complete. Matrix shape: {self.shap_matrix.shape}")
         return self.shap_values
