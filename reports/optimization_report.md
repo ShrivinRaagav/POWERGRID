@@ -7,12 +7,12 @@ This report presents the decision-support optimization analysis for **POWERGRID*
 ## 1. Executive Summary
 
 - **Selected Forecasting Engine**: `lightgbm_quantile` (loaded from [reports/best_model.json](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/best_model.json))
-- **Total Allocated Project Budget**: `INR 302,989,407.00`
-- **Optimized Procurement Cost**: `INR 3,602,449.00` (Budget Utilization: `1.19%`)
-- **Estimated Annual Inventory Holding Cost**: `INR 731,358.82`
-- **Total Integrated Supply Chain Cost**: `INR 4,333,807.82`
-- **Mean Service Level Fulfillment**: `4.33%`
-- **Delivery Delay Risk Index**: `5.0000`
+- **Total Allocated Project Budget**: `INR 105,602,812.50`
+- **Optimized Procurement Cost**: `INR 57,149,356.00` (Budget Utilization: `54.12%`)
+- **Estimated Annual Inventory Holding Cost**: `INR 7,399,298.40`
+- **Total Integrated Supply Chain Cost**: `INR 64,548,654.40`
+- **Mean Service Level Fulfillment**: `96.54%`
+- **Delivery Delay Risk Index**: `6.1667`
 - **Pareto Optimal Frontier Solutions**: `100 Non-dominated Trade-off Points`
 - **Primary Visualization Artifacts**: [reports/optimization_plots/](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/optimization_plots/)
 
@@ -46,11 +46,12 @@ The table below presents the compromise optimal procurement and inventory recomm
 
 | Material Category | Forecasted Demand | Current Inventory | Recommended Qty | Safety Stock | Reorder Point | Expected Inv Level | Estimated Cost (INR) | Service Level |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Transformer_Oil** | `169684` | `1500` | `6472` | `136183` | `149236` | `-161713` | `INR 776,602.80` | `4.70%` |
-| **Conductor_ACSR** | `139032` | `2200` | `480` | `87221` | `103263` | `-136352` | `INR 216,004.50` | `1.93%` |
-| **Insulator_Porcelain** | `197850` | `3100` | `11780` | `121905` | `133319` | `-182971` | `INR 1,001,291.50` | `7.52%` |
-| **Steel_Structure** | `194508` | `1800` | `60` | `171194` | `201119` | `-192648` | `INR 37,200.00` | `0.96%` |
-| **Control_Cable** | `153106` | `2500` | `7483` | `141567` | `153344` | `-143123` | `INR 1,571,350.20` | `6.52%` |
+| **Conductor** | `4630` | `1200` | `3430` | `5582` | `12527` | `0` | `INR 15,435,945.00` | `100.00%` |
+| **Earthwire** | `1205` | `400` | `808` | `1452` | `2657` | `3` | `INR 1,454,706.00` | `100.00%` |
+| **Hardware Fittings** | `1665` | `500` | `1170` | `1517` | `2766` | `5` | `INR 994,908.00` | `100.00%` |
+| **Insulator** | `2790` | `800` | `2020` | `1451` | `4241` | `30` | `INR 2,424,192.00` | `100.00%` |
+| **Tower Member** | `3810` | `1000` | `2811` | `3903` | `11523` | `1` | `INR 18,272,605.00` | `100.00%` |
+| **Transformer** | `71` | `15` | `41` | `62` | `275` | `0` | `INR 18,567,000.00` | `79.24%` |
 
 For the full export, see [reports/procurement_recommendations.csv](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/procurement_recommendations.csv).
 
@@ -60,9 +61,9 @@ For the full export, see [reports/procurement_recommendations.csv](file:///c:/Us
 
 1. **Trade-off Dynamics**: The NSGA-II algorithm generated `100` Pareto-optimal trade-off solutions along the non-dominated frontier. Increasing target service levels from 85% to 98% requires an estimated 14.2% increase in safety stock holding buffers.
 2. **Cost Breakdown**:
-   - **Procurement Expense**: `83.1%` of total supply chain budget.
-   - **Annual Inventory Holding Expense**: `16.9%` of total supply chain budget.
-3. **Budget Utilization**: The compromise solution consumes `1.19%` of allocated capital, leaving a strategic liquidity buffer of `INR 299,386,958.00` for emergency grid repairs.
+   - **Procurement Expense**: `88.5%` of total supply chain budget.
+   - **Annual Inventory Holding Expense**: `11.5%` of total supply chain budget.
+3. **Budget Utilization**: The compromise solution consumes `54.12%` of allocated capital, leaving a strategic liquidity buffer of `INR 48,453,456.50` for emergency grid repairs.
 
 ---
 

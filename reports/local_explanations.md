@@ -20,90 +20,90 @@ Where:
 ## 2. Highest Demand Prediction Case Study
 
 - **Scenario Type**: Highest Predicted Demand
-- **Test Sample Index**: `367`
-- **Actual Material Demand**: `2071.50`
-- **Predicted Material Demand**: `2098.81`
-- **Base Expected Value (E[f(X)])**: `540.44`
+- **Test Sample Index**: `532`
+- **Actual Material Demand**: `2155.00`
+- **Predicted Material Demand**: `2154.22`
+- **Base Expected Value (E[f(X)])**: `542.05`
 
 ### Key Positive Drivers (Pushing Forecast Higher)
 
 | Feature | Feature Value | SHAP Contribution |
 | :--- | :---: | :---: |
-| `Historical_Demand` | `2.4932` | `+1478.7683` |
-| `DWT_cD_2_Std` | `258.5917` | `+40.3890` |
-| `EMD_IMF_4_Var` | `31939.2578` | `+19.8673` |
-| `EMD_IMF_1` | `393.5531` | `+8.4968` |
-| `Lead_Time_Days` | `-0.7768` | `+7.4617` |
+| `Historical_Demand` | `2.5451` | `+1565.0460` |
+| `DWT_cD_2_Std` | `290.2630` | `+30.3724` |
+| `Lead_Time_Days` | `-0.7963` | `+9.4163` |
+| `EMD_IMF_1` | `398.6700` | `+4.1612` |
+| `EMD_IMF_2` | `187.0103` | `+2.0163` |
 
 ### Key Negative Drivers (Pushing Forecast Lower)
 
 | Feature | Feature Value | SHAP Contribution |
 | :--- | :---: | :---: |
-| `Current_Inventory` | `0.7904` | `-0.1114` |
-| `DWT_cD_1_Mean` | `-28.0160` | `-0.0638` |
-| `Project_Phase` | `-1.0000` | `-0.0296` |
-| `EMD_IMF_3_Mean` | `-4.9724` | `-0.0288` |
-| `DWT_cD_3_Entropy` | `3.8314` | `-0.0194` |
+| `Current_Inventory` | `0.8011` | `-0.8925` |
+| `EMD_IMF_5` | `-628.8579` | `-0.5568` |
+| `DWT_cD_2_Mean` | `-2.7231` | `-0.0535` |
+| `Trend_Strength` | `0.7271` | `-0.0439` |
+| `DWT_cD_1_Entropy` | `5.8597` | `-0.0389` |
 
 ---
 
 ## 2. Median Demand Prediction Case Study
 
 - **Scenario Type**: Median Predicted Demand
-- **Test Sample Index**: `1406`
-- **Actual Material Demand**: `530.00`
-- **Predicted Material Demand**: `504.34`
-- **Base Expected Value (E[f(X)])**: `540.44`
+- **Test Sample Index**: `934`
+- **Actual Material Demand**: `499.00`
+- **Predicted Material Demand**: `503.83`
+- **Base Expected Value (E[f(X)])**: `542.05`
 
 ### Key Positive Drivers (Pushing Forecast Higher)
 
 | Feature | Feature Value | SHAP Contribution |
 | :--- | :---: | :---: |
-| `DWT_cD_2_Std` | `153.1325` | `+15.6400` |
-| `EMD_IMF_4_Var` | `12633.9379` | `+2.5591` |
-| `EMD_IMF_1` | `158.2342` | `+2.2373` |
-| `Rolling_STD_3` | `182.9502` | `+0.8212` |
-| `Storage_Capacity` | `1.0415` | `+0.8122` |
+| `DWT_cD_2_Std` | `214.3390` | `+14.1034` |
+| `Seasonality_Strength` | `0.5602` | `+6.0805` |
+| `EMD_IMF_2_Mean` | `2.1275` | `+5.9199` |
+| `EMD_IMF_1` | `128.0160` | `+2.2865` |
+| `Production_Capacity` | `0.5128` | `+1.5587` |
 
 ### Key Negative Drivers (Pushing Forecast Lower)
 
 | Feature | Feature Value | SHAP Contribution |
 | :--- | :---: | :---: |
-| `Historical_Demand` | `-0.0693` | `-58.1257` |
-| `EMD_IMF_2` | `-201.8000` | `-0.9466` |
-| `Trend_Strength` | `0.5538` | `-0.3228` |
-| `DWT_cD_3_Entropy` | `3.7446` | `-0.1764` |
-| `DWT_Approximation_Energy_Ratio` | `0.9010` | `-0.1345` |
+| `Historical_Demand` | `-0.1000` | `-57.3689` |
+| `Storage_Capacity` | `0.9703` | `-8.6773` |
+| `Lead_Time_Days` | `1.6070` | `-5.3929` |
+| `EMD_IMF_2` | `-56.6078` | `-1.4366` |
+| `EMD_IMF_4_Mean` | `27.4813` | `-0.9108` |
 
 ---
 
 ## 2. Lowest Demand Prediction Case Study
 
 - **Scenario Type**: Lowest Predicted Demand
-- **Test Sample Index**: `1029`
-- **Actual Material Demand**: `17.00`
-- **Predicted Material Demand**: `7.40`
-- **Base Expected Value (E[f(X)])**: `540.44`
+- **Test Sample Index**: `1084`
+- **Actual Material Demand**: `10.00`
+- **Predicted Material Demand**: `-5.65`
+- **Base Expected Value (E[f(X)])**: `542.05`
 
 ### Key Positive Drivers (Pushing Forecast Higher)
 
 | Feature | Feature Value | SHAP Contribution |
 | :--- | :---: | :---: |
-| `Lead_Time_Days` | `2.3105` | `+1.7645` |
-| `Storage_Capacity` | `0.8658` | `+0.2266` |
-| `Production_Capacity` | `-0.3625` | `+0.0999` |
-| `DWT_cD_3_Mean` | `0.1233` | `+0.0602` |
-| `Signal_Entropy` | `7.3338` | `+0.0458` |
+| `Seasonality_Strength` | `0.5378` | `+2.0436` |
+| `Lead_Time_Days` | `1.4117` | `+1.5251` |
+| `EMD_IMF_2_Mean` | `0.0587` | `+1.0936` |
+| `Seasonal_Demand_Index` | `1.1767` | `+0.2869` |
+| `Current_Inventory` | `-0.8658` | `+0.2092` |
 
 ### Key Negative Drivers (Pushing Forecast Lower)
 
 | Feature | Feature Value | SHAP Contribution |
 | :--- | :---: | :---: |
-| `Historical_Demand` | `-0.8528` | `-394.9843` |
-| `DWT_cD_2_Std` | `1.9860` | `-124.6210` |
-| `EMD_IMF_4_Var` | `1.2289` | `-12.7047` |
-| `Rolling_STD_3` | `0.2887` | `-0.9150` |
-| `EMD_IMF_5` | `-0.6124` | `-0.5213` |
+| `Historical_Demand` | `-0.8426` | `-408.1005` |
+| `DWT_cD_2_Std` | `1.5768` | `-111.2064` |
+| `Storage_Capacity` | `1.1258` | `-28.0668` |
+| `EMD_IMF_4_Var` | `12.5683` | `-1.7130` |
+| `EMD_IMF_1` | `0.9682` | `-1.3147` |
 
 ---
 

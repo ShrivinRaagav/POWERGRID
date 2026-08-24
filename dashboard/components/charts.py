@@ -44,40 +44,73 @@ def render_interactive_forecast_chart(
         st.info("No timeline prediction data available to display for the selected filter combination.")
         return
 
+    # Sort strictly by date if present to prevent zig-zag lines
+    df_plot = df.copy()
+    if "Date" in df_plot.columns:
+        df_plot["Date"] = pd.to_datetime(df_plot["Date"])
+        df_plot = df_plot.sort_values(by="Date").reset_index(drop=True)
+
     fig = go.Figure()
 
     # Dates
-    dates = pd.to_datetime(df["Date"]) if "Date" in df.columns else df.index
+    dates = df_plot["Date"] if "Date" in df_plot.columns else df_plot.index
+
+    # Quantile columns extraction & sanitization (non-negative & monotonic)
+    pred_col = "Forecast_Prediction" if "Forecast_Prediction" in df_plot.columns else ("P50" if "P50" in df_plot.columns else None)
+    p10_col = "Forecast_Prediction_P10" if "Forecast_Prediction_P10" in df_plot.columns else ("P10" if "P10" in df_plot.columns else None)
+    p90_col = "Forecast_Prediction_P90" if "Forecast_Prediction_P90" in df_plot.columns else ("P90" if "P90" in df_plot.columns else None)
+
+    # Sanitize series so bounds are well-behaved
+    if p10_col and p10_col in df_plot.columns:
+        p10_series = df_plot[p10_col].clip(lower=0.0)
+    else:
+        p10_series = None
+
+    if pred_col and pred_col in df_plot.columns:
+        p50_series = df_plot[pred_col].clip(lower=0.0)
+        if p10_series is not None:
+            p50_series = p50_series.clip(lower=p10_series)
+    else:
+        p50_series = None
+
+    if p90_col and p90_col in df_plot.columns:
+        p90_series = df_plot[p90_col].clip(lower=0.0)
+        if p50_series is not None:
+            p90_series = p90_series.clip(lower=p50_series)
+    else:
+        p90_series = None
 
     if show_quantile_bands:
         # 1. P90 Upper Bound (for shaded area)
-        if "Forecast_Prediction_P90" in df.columns:
+        if p90_series is not None:
             fig.add_trace(go.Scatter(
                 x=dates,
-                y=df["Forecast_Prediction_P90"],
+                y=p90_series,
                 mode="lines",
                 line=dict(width=0),
                 name="P90 Upper Bound (High Demand Risk)",
-                showlegend=False
+                showlegend=False,
+                hoverinfo="skip"
             ))
 
         # 2. P10 Lower Bound (shaded fill to P90)
-        if "Forecast_Prediction_P10" in df.columns:
+        if p10_series is not None:
             fig.add_trace(go.Scatter(
                 x=dates,
-                y=df["Forecast_Prediction_P10"],
+                y=p10_series,
                 mode="lines",
                 line=dict(width=0),
                 fill="tonexty",
                 fillcolor="rgba(31, 119, 180, 0.18)",
-                name="P10-P90 80% Confidence Band"
+                name="P10-P90 80% Confidence Band",
+                hoverinfo="skip"
             ))
 
     # 3. Actual Demand Line
-    if "Quantity_Required" in df.columns:
+    if "Quantity_Required" in df_plot.columns:
         fig.add_trace(go.Scatter(
             x=dates,
-            y=df["Quantity_Required"],
+            y=df_plot["Quantity_Required"],
             mode="lines+markers",
             name="Actual Demand (Units)",
             line=dict(color="#1f77b4", width=2.5),
@@ -85,22 +118,42 @@ def render_interactive_forecast_chart(
         ))
 
     # 4. Predicted Median Line (P50)
-    pred_col = "Forecast_Prediction" if "Forecast_Prediction" in df.columns else "P50"
-    if pred_col in df.columns:
+    if p50_series is not None:
         fig.add_trace(go.Scatter(
             x=dates,
-            y=df[pred_col],
+            y=p50_series,
             mode="lines+markers",
             name="Predicted Demand (P50 Median)",
             line=dict(color="#d62728", width=2.2, dash="dash"),
             marker=dict(size=4)
         ))
 
+    # 5. Optional P10 and P90 subtle reference lines when hovered
+    if show_quantile_bands:
+        if p10_series is not None:
+            fig.add_trace(go.Scatter(
+                x=dates,
+                y=p10_series,
+                mode="lines",
+                name="P10 Lower Bound (Optimistic)",
+                line=dict(color="#0284c7", width=1, dash="dot"),
+                visible="legendonly"
+            ))
+        if p90_series is not None:
+            fig.add_trace(go.Scatter(
+                x=dates,
+                y=p90_series,
+                mode="lines",
+                name="P90 Upper Bound (Risk Ceiling)",
+                line=dict(color="#d97706", width=1, dash="dot"),
+                visible="legendonly"
+            ))
+
     # Styling for extreme readability
     fig.update_layout(
         title=dict(text=title, font=dict(size=18, family="Arial, sans-serif")),
         xaxis=dict(title="Timeline Date", showgrid=True, gridcolor="#e5e5e5"),
-        yaxis=dict(title="Material Quantity (Units)", showgrid=True, gridcolor="#e5e5e5"),
+        yaxis=dict(title="Material Quantity (Units)", showgrid=True, gridcolor="#e5e5e5", rangemode="nonnegative"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode="x unified",
         margin=dict(l=40, r=40, t=60, b=40),

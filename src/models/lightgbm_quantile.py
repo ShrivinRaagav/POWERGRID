@@ -17,10 +17,11 @@ class LightGBMQuantileForecastModel(BaseForecastModel):
     LightGBM Quantile Regression forecasting model.
     Trains three independent models corresponding to P10, P50, and P90 quantiles.
     """
-    def __init__(self, learning_rate: float = 0.05, n_estimators: int = 100, num_leaves: int = 31, random_state: int = 42, **kwargs):
+    def __init__(self, learning_rate: float = 0.07, n_estimators: int = 130, num_leaves: int = 31, min_child_samples: int = 8, random_state: int = 42, **kwargs):
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
         self.num_leaves = num_leaves
+        self.min_child_samples = min_child_samples
         self.random_state = random_state
         self.kwargs = kwargs
         
@@ -35,7 +36,7 @@ class LightGBMQuantileForecastModel(BaseForecastModel):
                 num_leaves=self.num_leaves,
                 random_state=self.random_state,
                 verbosity=-1,
-                min_child_samples=5,
+                min_child_samples=self.min_child_samples,
                 **self.kwargs
             )
         self.feature_cols = None
@@ -80,6 +81,10 @@ class LightGBMQuantileForecastModel(BaseForecastModel):
         p10 = self.models[0.1].predict(X_imputed)
         p50 = self.models[0.5].predict(X_imputed)
         p90 = self.models[0.9].predict(X_imputed)
+        
+        # Enforce non-crossing monotonicity: P10 <= P50 <= P90
+        p10 = np.minimum(p10, p50)
+        p90 = np.maximum(p90, p50)
         
         return {
             "P10": p10,

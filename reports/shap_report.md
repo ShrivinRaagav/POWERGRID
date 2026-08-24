@@ -8,8 +8,8 @@ This report presents the Explainable Artificial Intelligence (XAI) analysis usin
 
 - **Selected Best Forecasting Model**: `lightgbm_quantile`
 - **Model Selection Criterion**: `Lowest RMSE`
-- **Test Set Performance**: RMSE = `51.574281`, MAE = `17.945315`, WMAPE = `3.03%`, R² = `0.987161`
-- **Top 3 Predictive Drivers**: `Historical_Demand`, `DWT_cD_2_Std`, `EMD_IMF_4_Var`
+- **Test Set Performance**: RMSE = `52.295281`, MAE = `19.326147`, WMAPE = `3.26%`, R² = `0.986799`
+- **Top 3 Predictive Drivers**: `Historical_Demand`, `DWT_cD_2_Std`, `Production_Capacity`
 - **Primary Visualization Artifacts**: [reports/shap_plots/](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/shap_plots/)
 
 ---
@@ -33,21 +33,21 @@ The table below ranks the top features based on their mean absolute SHAP value (
 
 | Rank | Feature Name | Mean Absolute SHAP | Relative Importance (%) | Cumulative Importance (%) |
 | :---: | :--- | :---: | :---: | :---: |
-| 1 | `Historical_Demand` | 330.527424 | 84.04% | 84.04% |
-| 2 | `DWT_cD_2_Std` | 41.898027 | 10.65% | 94.69% |
-| 3 | `EMD_IMF_4_Var` | 4.578236 | 1.16% | 95.86% |
-| 4 | `Storage_Capacity` | 4.021799 | 1.02% | 96.88% |
-| 5 | `Production_Capacity` | 3.266611 | 0.83% | 97.71% |
-| 6 | `EMD_IMF_2_Mean` | 2.227308 | 0.57% | 98.28% |
-| 7 | `EMD_IMF_1` | 1.686053 | 0.43% | 98.71% |
-| 8 | `EMD_IMF_2` | 0.907613 | 0.23% | 98.94% |
-| 9 | `Lead_Time_Days` | 0.880203 | 0.22% | 99.16% |
-| 10 | `DWT_cD_2_Mean` | 0.871106 | 0.22% | 99.38% |
-| 11 | `EMD_IMF_5` | 0.498186 | 0.13% | 99.51% |
-| 12 | `Current_Inventory` | 0.352554 | 0.09% | 99.60% |
-| 13 | `Rolling_STD_3` | 0.341621 | 0.09% | 99.69% |
-| 14 | `Seasonal_Demand_Index` | 0.283187 | 0.07% | 99.76% |
-| 15 | `DWT_cD_1_Mean` | 0.123692 | 0.03% | 99.79% |
+| 1 | `Historical_Demand` | 336.007901 | 85.11% | 85.11% |
+| 2 | `DWT_cD_2_Std` | 40.549468 | 10.27% | 95.39% |
+| 3 | `Production_Capacity` | 3.968027 | 1.01% | 96.39% |
+| 4 | `Storage_Capacity` | 3.179986 | 0.81% | 97.20% |
+| 5 | `EMD_IMF_1` | 1.672017 | 0.42% | 97.62% |
+| 6 | `Lead_Time_Days` | 1.332975 | 0.34% | 97.96% |
+| 7 | `EMD_IMF_2` | 1.047352 | 0.27% | 98.22% |
+| 8 | `EMD_IMF_5` | 1.031236 | 0.26% | 98.48% |
+| 9 | `EMD_IMF_2_Mean` | 0.936702 | 0.24% | 98.72% |
+| 10 | `Rolling_STD_3` | 0.813724 | 0.21% | 98.93% |
+| 11 | `Current_Inventory` | 0.632578 | 0.16% | 99.09% |
+| 12 | `Seasonality_Strength` | 0.589053 | 0.15% | 99.24% |
+| 13 | `DWT_cD_2_Mean` | 0.575556 | 0.15% | 99.38% |
+| 14 | `EMD_IMF_4_Var` | 0.542962 | 0.14% | 99.52% |
+| 15 | `EMD_IMF_4_Mean` | 0.342389 | 0.09% | 99.61% |
 
 ---
 
@@ -69,9 +69,9 @@ Local explanations evaluate individual site predictions across three distinct op
 
 | Case Study Scenario | Test Sample Index | Actual Demand | Predicted Demand | Base Expected Value | Primary Driver |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Highest Demand** | `367` | `2071.50` | `2098.81` | `540.44` | `Historical_Demand` |
-| **Median Demand** | `1406` | `530.00` | `504.34` | `540.44` | `DWT_cD_2_Std` |
-| **Lowest Demand** | `1029` | `17.00` | `7.40` | `540.44` | `Lead_Time_Days` |
+| **Highest Demand** | `532` | `2155.00` | `2154.22` | `542.05` | `Historical_Demand` |
+| **Median Demand** | `934` | `499.00` | `503.83` | `542.05` | `DWT_cD_2_Std` |
+| **Lowest Demand** | `1084` | `10.00` | `-5.65` | `542.05` | `Seasonality_Strength` |
 
 For full local waterfall plots and force diagrams, see [reports/local_explanations.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/local_explanations.md) and [reports/shap_plots/shap_force.html](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/shap_plots/shap_force.html).
 

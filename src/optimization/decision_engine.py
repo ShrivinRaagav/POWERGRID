@@ -33,13 +33,13 @@ def generate_procurement_recommendations(
     rec_df["Recommended_Procurement_Qty"] = np.round(procurement_qty, 2)
     rec_df["Safety_Stock_Qty"] = np.round(safety_stock, 2)
 
-    # Reorder Point = (Demand / 52) * Lead_Time + Safety_Stock
-    weekly_demand = rec_df["Forecasted_Demand"] / 52.0
+    # Reorder Point = Weekly_Demand * Lead_Time + Safety_Stock (planning horizon is 4 weeks)
+    weekly_demand = rec_df["Forecasted_Demand"] / 4.0
     rec_df["Reorder_Point"] = np.round((weekly_demand * rec_df["Lead_Time_Weeks"]) + rec_df["Safety_Stock_Qty"], 2)
 
-    # Expected Inventory Level = Current Inventory + Procurement Qty - Forecasted Demand
+    # Expected Inventory Level at end of cycle = Current Inventory + Procurement Qty - Forecasted Demand
     rec_df["Expected_Inventory_Level"] = np.round(
-        rec_df["Current_Inventory"] + rec_df["Recommended_Procurement_Qty"] - rec_df["Forecasted_Demand"], 2
+        np.maximum(0.0, rec_df["Current_Inventory"] + rec_df["Recommended_Procurement_Qty"] - rec_df["Forecasted_Demand"]), 2
     )
 
     # Item Procurement Cost

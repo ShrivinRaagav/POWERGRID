@@ -1,9 +1,9 @@
 Metric,Value
-Total Procurement Cost (INR),3602449.0
-Total Inventory Holding Cost (INR),731358.824460046
-Total Supply Chain Cost (INR),4333807.824460046
-Delivery Delay Risk Index,5.0
-Mean Service Level (%),4.326
-Total Allocated Budget (INR),302989407.0
-Budget Utilization (%),1.1889686295204374
+Total Procurement Cost (INR),57149356.0
+Total Inventory Holding Cost (INR),7399298.396337261
+Total Supply Chain Cost (INR),64548654.39633726
+Delivery Delay Risk Index,6.166666666666667
+Mean Service Level (%),96.54
+Total Allocated Budget (INR),105602812.5
+Budget Utilization (%),54.11726699987276
 Pareto Optimal Solutions Count,100.0

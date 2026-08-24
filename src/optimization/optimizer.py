@@ -123,24 +123,34 @@ class SupplyChainOptimizationProblem(ElementwiseProblem):
 
 def select_compromise_solution(
     F: np.ndarray,
-    X: np.ndarray
+    X: np.ndarray,
+    target_min_service_level: float = 95.0
 ) -> Tuple[int, np.ndarray, np.ndarray]:
     """
-    Selects the best compromise optimal solution from Pareto front using TOPSIS / Minimum Ideal Distance.
+    Selects the best compromise optimal solution from Pareto front using TOPSIS / Minimum Ideal Distance,
+    prioritizing solutions satisfying POWERGRID's mission-critical target service level (>= 95%).
     """
     if len(F) == 0:
         raise ValueError("Pareto front F is empty.")
 
-    # Normalize objective matrix F between 0 and 1
-    f_min = np.min(F, axis=0)
-    f_max = np.max(F, axis=0)
+    service_levels = (1.0 - F[:, 3]) * 100.0
+    feasible_indices = np.where(service_levels >= target_min_service_level)[0]
+    
+    if len(feasible_indices) == 0:
+        # Fallback to top 15% highest service level solutions
+        feasible_indices = np.argsort(service_levels)[-max(5, int(0.15 * len(F))):]
+
+    sub_F = F[feasible_indices]
+    f_min = np.min(sub_F, axis=0)
+    f_max = np.max(sub_F, axis=0)
     denom = np.where((f_max - f_min) == 0, 1.0, f_max - f_min)
+    F_norm = (sub_F - f_min) / denom
 
-    F_norm = (F - f_min) / denom
-
-    # Distance to ideal point (0, 0, 0, 0, 0)
-    distances = np.linalg.norm(F_norm, axis=1)
-    best_idx = int(np.argmin(distances))
+    # TOPSIS weights: cost efficiency while sustaining top-tier grid reliability
+    weights = np.array([0.35, 0.20, 0.15, 0.20, 0.10])
+    distances = np.linalg.norm(F_norm * weights, axis=1)
+    best_sub_idx = int(np.argmin(distances))
+    best_idx = int(feasible_indices[best_sub_idx])
 
     return best_idx, F[best_idx], X[best_idx]
 

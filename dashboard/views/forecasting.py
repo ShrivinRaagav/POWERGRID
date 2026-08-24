@@ -116,6 +116,16 @@ def render_forecasting_page():
 
         st.markdown("---")
 
+        # Prepare data for time-series charts (aggregating duplicate timestamps when ALL regions/materials are selected)
+        agg_metric_cols = [c for c in ["Quantity_Required", "Forecast_Prediction", "Forecast_Prediction_P10", "Forecast_Prediction_P90", "P10", "P50", "P90"] if c in df_filtered.columns]
+        if "Date" in df_filtered.columns and len(df_filtered["Date"].unique()) < len(df_filtered):
+            df_chart = df_filtered.groupby("Date", as_index=False)[agg_metric_cols].sum()
+            df_chart = df_chart.sort_values(by="Date").reset_index(drop=True)
+        elif "Date" in df_filtered.columns:
+            df_chart = df_filtered.sort_values(by="Date").reset_index(drop=True)
+        else:
+            df_chart = df_filtered
+
         # ---------------------------------------------------------
         # SECTION 2: Actual vs Predicted Demand
         # ---------------------------------------------------------
@@ -124,7 +134,7 @@ def render_forecasting_page():
         # Point Forecast Line Chart
         chart_title1 = f"Actual Demand vs. Predicted Demand P50 ({sel_material} - Region: {sel_region})"
         chart_key_str1 = f"plotly_actual_vs_pred_{sel_region}_{sel_material}"
-        render_interactive_forecast_chart(df_filtered, title=chart_title1, show_quantile_bands=False, chart_key=chart_key_str1)
+        render_interactive_forecast_chart(df_chart, title=chart_title1, show_quantile_bands=False, chart_key=chart_key_str1)
 
         st.markdown("---")
 
@@ -136,4 +146,4 @@ def render_forecasting_page():
         # Full Probabilistic Chart
         chart_title2 = f"Probabilistic Forecast Bounds P10-P50-P90 ({sel_material} - Region: {sel_region})"
         chart_key_str2 = f"plotly_probabilistic_{sel_region}_{sel_material}"
-        render_interactive_forecast_chart(df_filtered, title=chart_title2, show_quantile_bands=True, chart_key=chart_key_str2)
+        render_interactive_forecast_chart(df_chart, title=chart_title2, show_quantile_bands=True, chart_key=chart_key_str2)

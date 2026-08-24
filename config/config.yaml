@@ -138,9 +138,10 @@ models:
     early_stopping_rounds: 10
     random_state: 42
   lightgbm_quantile:
-    n_estimators: 100
-    learning_rate: 0.05
+    n_estimators: 130
+    learning_rate: 0.07
     num_leaves: 31
+    min_child_samples: 8
     random_state: 42
   lstm:
     epochs: 30
