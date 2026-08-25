@@ -30,9 +30,9 @@ This report summarizes the mathematical and signal processing quality of the Dis
 - **Signal Reconstructibility**: Inverse DWT (`pywt.waverec`) achieves an average correlation of **100.0000%** with the original signal, confirming zero-loss numeric transformation.
 
 ### 3. Supply Chain Dynamics
-- **Average Trend Strength ($F_T$)**: `0.7558`
+- **Average Trend Strength ($F_T$)**: `0.0384`
   - Represents the proportion of demand variance explained by the low-frequency project baseline.
-- **Average Seasonality Strength ($F_S$)**: `0.3023`
+- **Average Seasonality Strength ($F_S$)**: `0.2522`
   - Represents the strength of cyclic variations (monsoons, holiday slowdowns, weather waves) within the dataset.
 
 ---

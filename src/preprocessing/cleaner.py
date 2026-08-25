@@ -39,12 +39,12 @@ class DataCleaner:
             median_val = valid_vals.median()
             self.medians[col] = median_val if not pd.isna(median_val) else 0.0
             
-            # Compute IQR outlier bounds
+            # Compute IQR outlier bounds with 3.0*IQR multiplier to protect high-volume material variations
             q1 = valid_vals.quantile(0.25)
             q3 = valid_vals.quantile(0.75)
             iqr = q3 - q1
-            lower_bound = q1 - 1.5 * iqr
-            upper_bound = q3 + 1.5 * iqr
+            lower_bound = max(0.0, q1 - 3.0 * iqr) if col in ["Current_Inventory", "Historical_Demand", "Lead_Time_Days"] else q1 - 3.0 * iqr
+            upper_bound = q3 + 3.0 * iqr
             self.outlier_bounds[col] = (lower_bound, upper_bound)
             
         if TARGET_COL in df.columns:
@@ -53,7 +53,7 @@ class DataCleaner:
             q1 = valid_vals.quantile(0.25)
             q3 = valid_vals.quantile(0.75)
             iqr = q3 - q1
-            self.outlier_bounds[TARGET_COL] = (q1 - 1.5 * iqr, q3 + 1.5 * iqr)
+            self.outlier_bounds[TARGET_COL] = (max(0.0, q1 - 3.0 * iqr), q3 + 3.0 * iqr)
             
         # 2. Compute Modes for categorical columns
         for col in CATEGORICAL_COLS:

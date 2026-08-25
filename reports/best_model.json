@@ -1,14 +1,14 @@
 {
-    "best_model": "lightgbm_quantile",
+    "best_model": "xgboost",
     "selection_criterion": "Lowest RMSE",
     "evaluation_metrics": {
-        "MAE": 19.326147,
-        "RMSE": 52.295281,
-        "MAPE": 14.939452,
-        "WMAPE": "3.26%",
-        "SMAPE": 18.194119,
-        "R2": 0.986799,
-        "PinballLoss": "9.661683"
+        "MAE": 65.99295,
+        "RMSE": 97.268501,
+        "MAPE": 36.442397,
+        "WMAPE": "8.47%",
+        "SMAPE": 20.811533,
+        "R2": 0.983523,
+        "PinballLoss": null
     },
-    "generated_at": "2026-08-24T20:13:33.821172"
+    "generated_at": "2026-08-25T10:16:38.013555"
 }

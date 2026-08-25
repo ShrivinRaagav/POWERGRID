@@ -70,18 +70,22 @@ def render_forecasting_page():
         p10_col = "Forecast_Prediction_P10" if "Forecast_Prediction_P10" in df_filtered.columns else pred_col
         p90_col = "Forecast_Prediction_P90" if "Forecast_Prediction_P90" in df_filtered.columns else pred_col
 
+        n_weeks = len(df_filtered["Date"].unique()) if "Date" in df_filtered.columns else 48
         tot_pred = float(df_filtered[pred_col].sum()) if pred_col in df_filtered.columns else 0.0
+        tot_p10 = float(df_filtered[p10_col].sum()) if p10_col in df_filtered.columns else 0.0
+        tot_p90 = float(df_filtered[p90_col].sum()) if p90_col in df_filtered.columns else 0.0
+        avg_pred = float(df_filtered[pred_col].mean()) if pred_col in df_filtered.columns else 0.0
         avg_p10 = float(df_filtered[p10_col].mean()) if p10_col in df_filtered.columns else 0.0
         avg_p90 = float(df_filtered[p90_col].mean()) if p90_col in df_filtered.columns else 0.0
 
         # Summary Metric Cards
         card1, card2, card3 = st.columns(3)
         with card1:
-            st.metric("Forecast Horizon", "312 Weeks (6 Years)", help="Weekly timeline observations 2020-2025")
+            st.metric("Forecast Horizon", f"{n_weeks} Weeks (Test Set)", help=f"Chronological test set evaluation horizon across {n_weeks} weekly time steps.")
         with card2:
-            st.metric("Predicted Total Demand", f"{tot_pred:,.0f} Units", help="Sum of P50 predicted demand across selected horizon")
+            st.metric("Total Forecasted Demand", f"{tot_pred:,.0f} Units", help=f"Total point forecast sum across selected scope. Total 80% Range: {tot_p10:,.0f} - {tot_p90:,.0f} Units")
         with card3:
-            st.metric("80% Confidence Interval", f"{avg_p10:,.0f} - {avg_p90:,.0f} Units", help="Average weekly P10 (Lower) to P90 (Upper) interval")
+            st.metric("Avg Weekly Demand (80% Band)", f"{avg_pred:,.0f} Units/wk", f"80% Band: {avg_p10:,.0f} - {avg_p90:,.0f} Units", help="Average weekly forecasted demand with P10 to P90 uncertainty interval")
 
         st.markdown("---")
 

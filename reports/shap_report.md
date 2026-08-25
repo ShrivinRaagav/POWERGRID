@@ -1,15 +1,15 @@
 # SHAP Explainability & Model Transparency Report (Module 4)
 
-This report presents the Explainable Artificial Intelligence (XAI) analysis using **SHAP (SHapley Additive exPlanations)** for the selected best-performing material demand forecasting model (**lightgbm_quantile**).
+This report presents the Explainable Artificial Intelligence (XAI) analysis using **SHAP (SHapley Additive exPlanations)** for the selected best-performing material demand forecasting model (**xgboost**).
 
 ---
 
 ## 1. Executive Summary
 
-- **Selected Best Forecasting Model**: `lightgbm_quantile`
+- **Selected Best Forecasting Model**: `xgboost`
 - **Model Selection Criterion**: `Lowest RMSE`
-- **Test Set Performance**: RMSE = `52.295281`, MAE = `19.326147`, WMAPE = `3.26%`, R² = `0.986799`
-- **Top 3 Predictive Drivers**: `Historical_Demand`, `DWT_cD_2_Std`, `Production_Capacity`
+- **Test Set Performance**: RMSE = `97.268501`, MAE = `65.992950`, WMAPE = `8.47%`, R² = `0.983523`
+- **Top 3 Predictive Drivers**: `EMD_IMF_6`, `Classical_Residual`, `Rolling_Max_3`
 - **Primary Visualization Artifacts**: [reports/shap_plots/](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/shap_plots/)
 
 ---
@@ -33,21 +33,21 @@ The table below ranks the top features based on their mean absolute SHAP value (
 
 | Rank | Feature Name | Mean Absolute SHAP | Relative Importance (%) | Cumulative Importance (%) |
 | :---: | :--- | :---: | :---: | :---: |
-| 1 | `Historical_Demand` | 336.007901 | 85.11% | 85.11% |
-| 2 | `DWT_cD_2_Std` | 40.549468 | 10.27% | 95.39% |
-| 3 | `Production_Capacity` | 3.968027 | 1.01% | 96.39% |
-| 4 | `Storage_Capacity` | 3.179986 | 0.81% | 97.20% |
-| 5 | `EMD_IMF_1` | 1.672017 | 0.42% | 97.62% |
-| 6 | `Lead_Time_Days` | 1.332975 | 0.34% | 97.96% |
-| 7 | `EMD_IMF_2` | 1.047352 | 0.27% | 98.22% |
-| 8 | `EMD_IMF_5` | 1.031236 | 0.26% | 98.48% |
-| 9 | `EMD_IMF_2_Mean` | 0.936702 | 0.24% | 98.72% |
-| 10 | `Rolling_STD_3` | 0.813724 | 0.21% | 98.93% |
-| 11 | `Current_Inventory` | 0.632578 | 0.16% | 99.09% |
-| 12 | `Seasonality_Strength` | 0.589053 | 0.15% | 99.24% |
-| 13 | `DWT_cD_2_Mean` | 0.575556 | 0.15% | 99.38% |
-| 14 | `EMD_IMF_4_Var` | 0.542962 | 0.14% | 99.52% |
-| 15 | `EMD_IMF_4_Mean` | 0.342389 | 0.09% | 99.61% |
+| 1 | `EMD_IMF_6` | 261.752500 | 28.65% | 28.65% |
+| 2 | `Classical_Residual` | 258.908663 | 28.34% | 57.00% |
+| 3 | `Rolling_Max_3` | 123.842990 | 13.56% | 70.55% |
+| 4 | `Classical_Seasonal` | 85.281946 | 9.34% | 79.89% |
+| 5 | `EMD_IMF_1` | 60.969168 | 6.67% | 86.56% |
+| 6 | `Residual_Mean` | 17.531626 | 1.92% | 88.48% |
+| 7 | `EMD_IMF_2_Mean` | 14.581050 | 1.60% | 90.08% |
+| 8 | `Current_Inventory` | 12.390493 | 1.36% | 91.43% |
+| 9 | `EMD_IMF_5_Mean` | 11.584917 | 1.27% | 92.70% |
+| 10 | `Rolling_STD_3` | 10.629227 | 1.16% | 93.87% |
+| 11 | `Trend_Slope` | 6.092160 | 0.67% | 94.53% |
+| 12 | `DWT_cD_1_Mean` | 4.938296 | 0.54% | 95.07% |
+| 13 | `DWT_cD_1_Entropy` | 4.472704 | 0.49% | 95.56% |
+| 14 | `Seasonality_Strength` | 4.252992 | 0.47% | 96.03% |
+| 15 | `Signal_Entropy` | 4.160349 | 0.46% | 96.48% |
 
 ---
 
@@ -69,9 +69,9 @@ Local explanations evaluate individual site predictions across three distinct op
 
 | Case Study Scenario | Test Sample Index | Actual Demand | Predicted Demand | Base Expected Value | Primary Driver |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Highest Demand** | `532` | `2155.00` | `2154.22` | `542.05` | `Historical_Demand` |
-| **Median Demand** | `934` | `499.00` | `503.83` | `542.05` | `DWT_cD_2_Std` |
-| **Lowest Demand** | `1084` | `10.00` | `-5.65` | `542.05` | `Seasonality_Strength` |
+| **Highest Demand** | `45` | `3558.00` | `3439.22` | `728.93` | `Classical_Residual` |
+| **Median Demand** | `44` | `739.00` | `690.60` | `728.93` | `Classical_Seasonal` |
+| **Lowest Demand** | `99` | `4.00` | `11.24` | `728.93` | `Trend_Slope` |
 
 For full local waterfall plots and force diagrams, see [reports/local_explanations.md](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/local_explanations.md) and [reports/shap_plots/shap_force.html](file:///c:/Users/kavsh/Desktop/POWERGRID/reports/shap_plots/shap_force.html).
 

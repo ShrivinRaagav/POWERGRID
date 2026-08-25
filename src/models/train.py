@@ -68,9 +68,9 @@ def run_training_flow(model_name: str, notes: str = "", auto_update_reports: boo
     train_df, val_df, test_df = split_chronological(df)
     logger.info(f"Chronological split: Train={train_df.shape}, Val={val_df.shape}, Test={test_df.shape}")
     
-    # Extract feature list (all columns except Date, Project_ID, Region, Material_Type, and Target)
-    id_cols = [c for c in ["Date", "Project_ID", "Region", "Material_Type"] if c in df.columns]
-    feature_cols = [col for col in df.columns if col not in id_cols and col != TARGET_COL]
+    # Extract feature list (all columns except Date, Project_ID, and Target)
+    id_metadata_cols = [c for c in ["Date", "Project_ID", "Region", "Material_Type"] if c in df.columns]
+    feature_cols = [col for col in df.columns if col not in ["Date", "Project_ID"] and col != TARGET_COL]
     
     X_train, y_train = train_df[feature_cols], train_df[TARGET_COL]
     X_val, y_val = val_df[feature_cols], val_df[TARGET_COL]
@@ -104,7 +104,7 @@ def run_training_flow(model_name: str, notes: str = "", auto_update_reports: boo
     manager.save_model_checkpoint(model, filename="model.joblib")
     
     # Save predictions alongside actuals
-    df_preds = test_df[id_cols + [TARGET_COL]].copy()
+    df_preds = test_df[id_metadata_cols + [TARGET_COL]].copy()
     if isinstance(preds, dict):
         df_preds["Forecast_Prediction_P10"] = preds["P10"]
         df_preds["Forecast_Prediction"] = preds["P50"]

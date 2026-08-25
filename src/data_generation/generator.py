@@ -70,12 +70,16 @@ def generate_powergrid_data(num_rows: int = 18000) -> pd.DataFrame:
         reg = random.choice(list(region_state_wh.keys()))
         state, wh = random.choice(region_state_wh[reg])
         is_emer = "EMER" in proj
+        proj_start_week = random.randint(0, 52)
+        proj_duration = random.randint(35, 75)
         project_metadata[proj] = {
             "Region": reg,
             "State": state,
             "Warehouse": wh,
             "Budget": random.randint(200000, 600000) if is_emer else random.randint(100000, 400000),
-            "Is_Emergency": is_emer
+            "Is_Emergency": is_emer,
+            "Start_Week": proj_start_week,
+            "Duration": proj_duration
         }
         
     # Commodity Price baseline with inflation (5% annual) and cycles
@@ -124,7 +128,15 @@ def generate_powergrid_data(num_rows: int = 18000) -> pd.DataFrame:
             "Transformer": 90, "Conductor": 45, "Tower Member": 60,
             "Insulator": 30, "Earthwire": 30, "Hardware Fittings": 20
         }.get(mat, 30)
-        
+
+        base_demand = {
+            "Conductor": 480, "Tower Member": 380, "Insulator": 280,
+            "Transformer": 4, "Earthwire": 130, "Hardware Fittings": 180
+        }.get(mat, 100)
+
+        # Initialize genuine prior period demand (t-1) with independent noise draw
+        prior_demand = max(0, int(base_demand * np.random.uniform(0.80, 1.20) + np.random.normal(0, 0.15 * base_demand)))
+
         # Select active projects for this warehouse
         wh_projects = [p for p, meta in project_metadata.items() if meta["Warehouse"] == wh]
         if not wh_projects:
@@ -187,7 +199,12 @@ def generate_powergrid_data(num_rows: int = 18000) -> pd.DataFrame:
             is_shortage_window = (52 <= date_idx <= 80) and (mat in ["Conductor", "Transformer"])
             
             # --- Project Phase sequence & Demand Calculation ---
-            phase_idx = min(4, max(0, int((date_idx / len(dates)) * 5)))
+            # Each project progresses through its lifecycle (Planning -> Foundation -> Erection -> Stringing -> Commissioning)
+            proj_start = meta.get("Start_Week", 0)
+            proj_dur = meta.get("Duration", 52)
+            rel_week = (date_idx - proj_start) % proj_dur
+            prog = rel_week / proj_dur
+            phase_idx = min(4, int(prog * 5))
             project_phase = VALID_PROJECT_PHASES[phase_idx]
             
             phase_mult = 1.0
@@ -205,14 +222,9 @@ def generate_powergrid_data(num_rows: int = 18000) -> pd.DataFrame:
             # Monsoon slowdowns for outdoors construction
             monsoon_slowdown = 0.50 if (season == "Monsoon" and reg in ["ER", "NER"]) else 0.85 if (season == "Monsoon") else 1.0
             
-            base_demand = {
-                "Conductor": 480, "Tower Member": 380, "Insulator": 280,
-                "Transformer": 4, "Earthwire": 130, "Hardware Fittings": 180
-            }.get(mat, 100)
-            
-            # Calculate Quantity Required
+            # Calculate Quantity Required for current period t
             demand_trend = 1.0 + (date_idx / len(dates)) * 0.25 # grid demand grows 25% over 3 years
-            demand_noise = np.random.normal(0, 0.08 * base_demand)
+            demand_noise = np.random.normal(0, 0.15 * base_demand)
             
             quantity_required = int(base_demand * phase_mult * monsoon_slowdown * demand_trend * festival_mult * acceleration_mult + demand_noise)
             
@@ -223,8 +235,10 @@ def generate_powergrid_data(num_rows: int = 18000) -> pd.DataFrame:
             # Cap quantity_required at positive integer
             quantity_required = max(0, quantity_required)
             
-            # Historical Demand (lagged correlation)
-            historical_demand = max(0, int(quantity_required * 0.94 + np.random.normal(0, 10)))
+            # Historical Demand: Genuine lagged demand (t-1) with independent noise draw
+            historical_demand = max(0, int(prior_demand + np.random.normal(0, 0.15 * base_demand)))
+            # Update prior demand for next time step
+            prior_demand = quantity_required
             
             # --- operational scenario 5: Inventory Stockouts & Shortage limits ---
             if is_shortage_window:

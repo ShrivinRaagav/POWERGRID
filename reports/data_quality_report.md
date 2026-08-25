@@ -41,13 +41,11 @@ The dataset models transmission line material logistics for POWERGRID projects. 
 ## 6. Outlier Summary
 To prevent extreme numerical shocks from distorting forecast models (MLP, LSTM, SVR, etc.), outliers were capped using Interquartile Range (IQR) bounds $[Q1 - 1.5\times\text{IQR}, Q3 + 1.5\times\text{IQR}]$ fit on the training split:
 
-- **Historical_Demand**: 658 values adjusted/capped.
-- **Current_Inventory**: 1032 values adjusted/capped.
-- **Lead_Time_Days**: 214 values adjusted/capped.
-- **Supplier_Risk**: 658 values adjusted/capped.
-- **Commodity_Price**: 1156 values adjusted/capped.
-- **Transportation_Cost**: 586 values adjusted/capped.
-- **Project_Budget**: 98 values adjusted/capped.
+- **Historical_Demand**: 330 values adjusted/capped.
+- **Current_Inventory**: 275 values adjusted/capped.
+- **Lead_Time_Days**: 107 values adjusted/capped.
+- **Supplier_Risk**: 124 values adjusted/capped.
+- **Transportation_Cost**: 95 values adjusted/capped.
 
 ---
 
@@ -153,28 +151,28 @@ The following statistics describe the engineered variables computed on the train
 
 | Feature Name | Mean | Median | Std Dev | Min | Max |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Lag_1 | 280.3025 | 160.0000 | 312.6494 | 0.0000 | 1077.5000 |
-| Lag_2 | 278.4149 | 160.0000 | 311.0103 | 0.0000 | 1077.5000 |
-| Lag_3 | 276.5593 | 160.0000 | 309.2987 | 0.0000 | 1077.5000 |
-| Rolling_Mean_3 | 277.9092 | 166.6667 | 300.2694 | 0.0000 | 1077.5000 |
-| Rolling_Mean_6 | 274.4063 | 166.0000 | 294.0213 | 0.0000 | 1077.5000 |
-| Rolling_Max_3 | 333.4632 | 206.0000 | 343.3980 | 0.0000 | 1077.5000 |
-| Rolling_Min_3 | 226.0838 | 133.0000 | 271.5477 | 0.0000 | 1077.5000 |
-| Rolling_STD_3 | 57.8938 | 24.2040 | 82.2543 | 0.0000 | 622.0949 |
-| Demand_Velocity_1 | 1.8876 | 0.0000 | 140.1286 | -1077.5000 | 1077.5000 |
-| Demand_Velocity_2 | 1.8556 | 0.0000 | 139.8670 | -1077.5000 | 1077.5000 |
-| Demand_Acceleration | 0.0320 | 0.0000 | 238.0325 | -1496.0000 | 2155.0000 |
-| Demand_Volatility_3 | 0.3222 | 0.2467 | 0.3363 | 0.0000 | 1.7321 |
-| Peak_Spike_Flag | 0.1643 | 0.0000 | 0.3705 | 0.0000 | 1.0000 |
-| Dip_Drop_Flag | 0.1649 | 0.0000 | 0.3711 | 0.0000 | 1.0000 |
-| Inventory_Utilization | 0.0847 | 0.0433 | 0.1026 | 0.0000 | 0.5303 |
-| Lead_Time_Category | 0.8276 | 1.0000 | 0.7393 | 0.0000 | 2.0000 |
-| Demand_Growth | 0.1257 | 0.0000 | 0.6219 | -0.9991 | 2.0000 |
-| Inventory_Coverage | 7.0523 | 1.0385 | 14.7634 | 0.0000 | 52.0000 |
-| Budget_Utilization | 0.2717 | 0.1389 | 0.3569 | 0.0000 | 2.7780 |
-| Supplier_Risk_Score | 0.1489 | 0.1038 | 0.1295 | 0.0030 | 0.6283 |
-| Seasonal_Demand_Index | 1.0000 | 0.9631 | 0.1649 | 0.7943 | 1.3827 |
-| Transportation_Cost_Index | 0.5561 | 0.4951 | 0.2467 | 0.2000 | 1.4619 |
+| Lag_1 | 350.0560 | 221.5000 | 407.1341 | 0.0000 | 1858.0000 |
+| Lag_2 | 349.1729 | 221.0000 | 405.8696 | 0.0000 | 1858.0000 |
+| Lag_3 | 348.3257 | 221.0000 | 404.7518 | 0.0000 | 1858.0000 |
+| Rolling_Mean_3 | 349.5484 | 251.3333 | 356.5454 | 0.0000 | 1858.0000 |
+| Rolling_Mean_6 | 348.9562 | 258.5833 | 336.7360 | 0.0000 | 1858.0000 |
+| Rolling_Max_3 | 495.4920 | 360.0000 | 479.2705 | 0.0000 | 1858.0000 |
+| Rolling_Min_3 | 211.7983 | 112.0000 | 288.8894 | 0.0000 | 1858.0000 |
+| Rolling_STD_3 | 152.0733 | 81.7088 | 184.8126 | 0.0000 | 1072.7168 |
+| Demand_Velocity_1 | 0.8831 | 0.0000 | 335.7336 | -1858.0000 | 1858.0000 |
+| Demand_Velocity_2 | 0.8472 | 0.0000 | 333.7294 | -1858.0000 | 1858.0000 |
+| Demand_Acceleration | 0.0359 | 0.0000 | 571.9040 | -3344.0000 | 3670.0000 |
+| Demand_Volatility_3 | 0.5446 | 0.4583 | 0.4229 | 0.0000 | 1.7321 |
+| Peak_Spike_Flag | 0.2597 | 0.0000 | 0.4385 | 0.0000 | 1.0000 |
+| Dip_Drop_Flag | 0.2803 | 0.0000 | 0.4492 | 0.0000 | 1.0000 |
+| Inventory_Utilization | 0.0853 | 0.0464 | 0.1088 | 0.0000 | 0.6621 |
+| Lead_Time_Category | 0.7490 | 1.0000 | 0.7316 | 0.0000 | 2.0000 |
+| Demand_Growth | 0.2309 | 0.0000 | 0.8825 | -0.9995 | 2.0000 |
+| Inventory_Coverage | 3.6407 | 1.0353 | 10.4620 | 0.0000 | 52.0000 |
+| Budget_Utilization | 0.3312 | 0.1835 | 0.4419 | 0.0000 | 4.1852 |
+| Supplier_Risk_Score | 0.1404 | 0.0931 | 0.1362 | 0.0030 | 0.9226 |
+| Seasonal_Demand_Index | 1.0000 | 1.0670 | 0.1252 | 0.8031 | 1.1583 |
+| Transportation_Cost_Index | 0.6116 | 0.5460 | 0.2884 | 0.2000 | 2.2671 |
 
 ---
 

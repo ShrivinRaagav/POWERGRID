@@ -20,7 +20,8 @@ from src.features.temporal import extract_temporal_features
 from src.features.engineer import FeatureEngineer, generate_feature_summary
 from src.utils.helpers import setup_logger
 from src.utils.reports_generator import (
-    generate_data_quality_report, generate_data_dictionary, generate_pipeline_diagram
+    generate_data_quality_report, generate_data_dictionary, generate_pipeline_diagram,
+    generate_data_leakage_report
 )
 from src.time_series.decomposition import TimeSeriesFeatureExtractor
 from src.time_series.visualization import generate_important_plots
@@ -29,7 +30,7 @@ from src.feature_selection.feature_selector import FeatureSelector
 from src.utils.catalog_generator import generate_feature_catalog
 from src.config.settings import (
     FS_RECONSTRUCTION_REPORT_PATH, FS_QUALITY_REPORT_PATH, FS_CATALOG_PATH,
-    DATASET_VERSION_PATH, FORECAST_RANDOM_SEED
+    DATASET_VERSION_PATH, DATA_LEAKAGE_REPORT_PATH, FORECAST_RANDOM_SEED
 )
 from src.utils.version_writer import generate_dataset_version_report
 
@@ -160,8 +161,8 @@ def run_pipeline(method: str = "ordinal") -> dict:
     engineer.fit(train_temp)
     
     train_eng = engineer.transform(train_temp)
-    val_eng = engineer.transform(val_temp)
-    test_eng = engineer.transform(test_temp)
+    val_eng = engineer.transform(val_temp, history_df=train_temp)
+    test_eng = engineer.transform(test_temp, history_df=pd.concat([train_temp, val_temp], ignore_index=True))
     
     # Save the feature engineer for future inference
     joblib.dump(engineer, Path(RAW_DATA_PATH).parent.parent.parent / "models" / "feature_engineer.joblib")
@@ -308,6 +309,13 @@ def run_pipeline(method: str = "ordinal") -> dict:
     # Generate Pipeline Diagram
     generate_pipeline_diagram(
         output_path=PIPELINE_DIAGRAM_PATH
+    )
+    # Generate Data Leakage Audit Report
+    generate_data_leakage_report(
+        df=processed_selected,
+        output_path=DATA_LEAKAGE_REPORT_PATH,
+        target_col=TARGET_COL,
+        threshold=0.95
     )
     
     duration = time.perf_counter() - stage_start

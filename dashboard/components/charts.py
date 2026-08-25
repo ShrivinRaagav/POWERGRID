@@ -81,14 +81,14 @@ def render_interactive_forecast_chart(
         p90_series = None
 
     if show_quantile_bands:
-        # 1. P90 Upper Bound (for shaded area)
+        # 1. P90 Upper Bound (invisible line to anchor the shaded band)
         if p90_series is not None:
             fig.add_trace(go.Scatter(
                 x=dates,
                 y=p90_series,
                 mode="lines",
                 line=dict(width=0),
-                name="P90 Upper Bound (High Demand Risk)",
+                name="P90 Upper Bound",
                 showlegend=False,
                 hoverinfo="skip"
             ))
@@ -102,7 +102,7 @@ def render_interactive_forecast_chart(
                 line=dict(width=0),
                 fill="tonexty",
                 fillcolor="rgba(31, 119, 180, 0.18)",
-                name="P10-P90 80% Confidence Band",
+                name="80% Confidence Band (P10–P90)",
                 hoverinfo="skip"
             ))
 
@@ -112,9 +112,10 @@ def render_interactive_forecast_chart(
             x=dates,
             y=df_plot["Quantity_Required"],
             mode="lines+markers",
-            name="Actual Demand (Units)",
+            name="Actual Demand",
             line=dict(color="#1f77b4", width=2.5),
-            marker=dict(size=4)
+            marker=dict(size=4),
+            hovertemplate="<b>Actual</b>: %{y:,.1f} Units<extra></extra>"
         ))
 
     # 4. Predicted Median Line (P50)
@@ -123,40 +124,69 @@ def render_interactive_forecast_chart(
             x=dates,
             y=p50_series,
             mode="lines+markers",
-            name="Predicted Demand (P50 Median)",
+            name="Predicted Demand (P50)",
             line=dict(color="#d62728", width=2.2, dash="dash"),
-            marker=dict(size=4)
+            marker=dict(size=4),
+            hovertemplate="<b>Forecast P50</b>: %{y:,.1f} Units<extra></extra>"
         ))
 
-    # 5. Optional P10 and P90 subtle reference lines when hovered
+    # 5. Optional P10 and P90 subtle reference lines
     if show_quantile_bands:
         if p10_series is not None:
             fig.add_trace(go.Scatter(
                 x=dates,
                 y=p10_series,
                 mode="lines",
-                name="P10 Lower Bound (Optimistic)",
-                line=dict(color="#0284c7", width=1, dash="dot"),
-                visible="legendonly"
+                name="P10 Lower Bound",
+                line=dict(color="#0284c7", width=1.2, dash="dot"),
+                hovertemplate="<b>P10 Lower</b>: %{y:,.1f} Units<extra></extra>"
             ))
         if p90_series is not None:
             fig.add_trace(go.Scatter(
                 x=dates,
                 y=p90_series,
                 mode="lines",
-                name="P90 Upper Bound (Risk Ceiling)",
-                line=dict(color="#d97706", width=1, dash="dot"),
-                visible="legendonly"
+                name="P90 Upper Bound",
+                line=dict(color="#d97706", width=1.2, dash="dot"),
+                hovertemplate="<b>P90 Upper</b>: %{y:,.1f} Units<extra></extra>"
             ))
 
-    # Styling for extreme readability
+    # Clean layout with zero text overlap (legend at bottom with dedicated margin)
     fig.update_layout(
-        title=dict(text=title, font=dict(size=18, family="Arial, sans-serif")),
-        xaxis=dict(title="Timeline Date", showgrid=True, gridcolor="#e5e5e5"),
-        yaxis=dict(title="Material Quantity (Units)", showgrid=True, gridcolor="#e5e5e5", rangemode="nonnegative"),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        title=dict(
+            text=title,
+            font=dict(size=15, family="Inter, -apple-system, sans-serif", color="#0f172a"),
+            x=0.0,
+            xanchor="left",
+            y=0.98,
+            yanchor="top"
+        ),
+        xaxis=dict(
+            title=dict(text="Timeline Date", font=dict(size=12, color="#475569")),
+            showgrid=True,
+            gridcolor="#f1f5f9",
+            zeroline=False
+        ),
+        yaxis=dict(
+            title=dict(text="Material Quantity (Units)", font=dict(size=12, color="#475569")),
+            showgrid=True,
+            gridcolor="#f1f5f9",
+            rangemode="nonnegative",
+            zeroline=False
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.16,
+            xanchor="center",
+            x=0.5,
+            bgcolor="rgba(255, 255, 255, 0.9)",
+            bordercolor="#e2e8f0",
+            borderwidth=1,
+            font=dict(size=11, color="#334155")
+        ),
         hovermode="x unified",
-        margin=dict(l=40, r=40, t=60, b=40),
+        margin=dict(l=55, r=35, t=55, b=75),
         template="plotly_white",
         height=520
     )

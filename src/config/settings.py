@@ -38,6 +38,7 @@ FEATURE_SUMMARY_PATH = BASE_DIR / config["paths"]["feature_summary_path"]
 DATA_QUALITY_REPORT_PATH = BASE_DIR / config["paths"]["data_quality_report_path"]
 DATA_DICTIONARY_PATH = BASE_DIR / config["paths"]["data_dictionary_path"]
 PIPELINE_DIAGRAM_PATH = BASE_DIR / config["paths"]["pipeline_diagram_path"]
+DATA_LEAKAGE_REPORT_PATH = REPORTS_DIR / "data_leakage_check.md"
 
 # Pipeline Parameters
 RANDOM_SEED = config["random_seed"]
